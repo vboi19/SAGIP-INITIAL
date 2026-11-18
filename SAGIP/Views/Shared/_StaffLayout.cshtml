@@ -43,27 +43,42 @@
             theme: {
                 extend: {
                     colors: {
-                        forest: {
-                            950: '#152E22',
-                            900: '#1B3B2B',
-                            800: '#214A35',
-                            700: '#2F6347',
+                        ink: {
+                            DEFAULT: '#0D1321',
+                            950: '#070A12',
+                            900: '#0D1321',
+                            800: '#151F34',
                         },
-                        sage: {
-                            200: '#C9D6C5',
-                            100: '#EAF0E8',
-                            50: '#F2F5EF',
+                        space: {
+                            DEFAULT: '#1D2D44',
+                            900: '#131E2E',
+                            800: '#1D2D44',
+                            700: '#263B59',
+                            600: '#324D73',
                         },
-                        terracotta: {
-                            800: '#8A3422',
-                            700: '#9A3F2B',
-                            200: '#E6C8BC',
-                            50: '#FBF1EC',
+                        slate: {
+                            DEFAULT: '#3E5C76',
+                            700: '#334C62',
+                            600: '#3E5C76',
+                            500: '#4E7292',
                         },
-                        canvas: '#F6F4EC',
+                        denim: {
+                            DEFAULT: '#748CAB',
+                            400: '#748CAB',
+                            300: '#8FA3BD',
+                            200: '#B0C1D4',
+                            100: '#D5DFEC',
+                        },
+                        eggshell: {
+                            DEFAULT: '#F0EBD8',
+                            50: '#FAF8F3',
+                            100: '#F5F1E5',
+                            200: '#F0EBD8',
+                            300: '#E4DCBF',
+                            400: '#D5C9A4',
+                        },
+                        canvas: '#F0EBD8',
                         surface: '#FFFFFF',
-                        mist: '#EEF2EB',
-                        hairline: '#DCE2D8',
                     },
                     fontFamily: {
                         serif: ['Fraunces', 'Georgia', 'serif'],
@@ -81,10 +96,19 @@
             overflow-x: hidden;
             max-width: 100vw;
         }
+
+        /* ================= PALETTE: DEEP SPACE & BLUE SLATE =================
+           #0D1321 - Ink Black
+           #1D2D44 - Deep Space Blue
+           #3E5C76 - Blue Slate
+           #748CAB - Dusty Denim
+           #F0EBD8 - Eggshell
+        */
+
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background-color: #F6F4EC;
-            color: #16211A;
+            background-color: #F0EBD8 !important;
+            color: #0D1321 !important;
         }
         .font-serif {
             font-family: 'Fraunces', Georgia, serif;
@@ -96,80 +120,225 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Comprehensive Dark Mode Rules */
+        /* Canvas / Main backgrounds */
+        .bg-\[\#F6F4EC\], [class*="bg-[#F6F4EC]"] {
+            background-color: #F0EBD8 !important;
+        }
+        
+        /* Deep Space Blue: Sidebar, primary desk headers & cards */
+        .bg-\[\#1B3B2B\], [class*="bg-[#1B3B2B]"],
+        .bg-\[\#152E22\], [class*="bg-[#152E22]"],
+        .bg-\[\#1B4D3E\], [class*="bg-[#1B4D3E]"] {
+            background-color: #1D2D44 !important;
+        }
+
+        /* Interactive Buttons / Actions */
+        .bg-\[\#214A35\], [class*="bg-[#214A35]"] {
+            background-color: #1D2D44 !important;
+        }
+        .hover\:bg-\[\#183828\]:hover {
+            background-color: #0D1321 !important;
+        }
+        .hover\:bg-\[\#143d31\]:hover {
+            background-color: #0D1321 !important;
+        }
+
+        /* Soft Denim Tinted Containers */
+        .bg-\[\#EAF0E8\], [class*="bg-[#EAF0E8]"],
+        .bg-\[\#F2F5EF\], [class*="bg-[#F2F5EF]"] {
+            background-color: rgba(116, 140, 171, 0.16) !important;
+        }
+        .hover\:bg-\[\#EAF0E8\]\/50:hover, tr.hover\:bg-\[\#EAF0E8\]\/50:hover td {
+            background-color: rgba(116, 140, 171, 0.20) !important;
+        }
+
+        /* Table Headers in Light Mode: Soft Eggshell Tone */
+        .bg-\[\#F6F4EC\] table thead, table thead.bg-\[\#F6F4EC\] {
+            background-color: #E6DFC9 !important;
+            color: #1D2D44 !important;
+            border-color: rgba(116, 140, 171, 0.35) !important;
+        }
+
+        /* Hairlines, Dividers & Card Outlines */
+        .border-\[\#DCE2D8\], [class*="border-[#DCE2D8]"],
+        .border-\[\#C9D6C5\], [class*="border-[#C9D6C5]"],
+        .border-\[\#E2DEC9\], [class*="border-[#E2DEC9]"] {
+            border-color: rgba(116, 140, 171, 0.35) !important;
+        }
+        .divide-\[\#DCE2D8\] > :not([hidden]) ~ :not([hidden]) {
+            border-color: rgba(116, 140, 171, 0.35) !important;
+        }
+        .border-\[\#214A35\], [class*="border-[#214A35]"],
+        .border-\[\#1B3B2B\], [class*="border-[#1B3B2B]"],
+        .border-\[\#1B4D3E\], [class*="border-[#1B4D3E]"] {
+            border-color: #1D2D44 !important;
+        }
+
+        /* Typography & Text Accent Mappings */
+        .text-\[\#16211A\], [class*="text-[#16211A]"],
+        .text-\[\#1B3B2B\], [class*="text-[#1B3B2B]"] {
+            color: #0D1321 !important;
+        }
+        .text-\[\#1B4D3E\], [class*="text-[#1B4D3E]"] {
+            color: #1D2D44 !important;
+        }
+        .text-\[\#214A35\], [class*="text-[#214A35]"],
+        .text-\[\#2F6347\], [class*="text-[#2F6347]"] {
+            color: #1D2D44 !important;
+        }
+        .text-\[\#45544B\], [class*="text-[#45544B]"] {
+            color: #2D415A !important;
+        }
+        .text-\[\#66756B\], [class*="text-[#66756B]"],
+        .text-\[\#526058\], [class*="text-[#526058]"] {
+            color: #556E8B !important;
+        }
+        .text-\[\#C9D6C5\], [class*="text-[#C9D6C5]"],
+        .text-\[\#DCE2D8\], [class*="text-[#DCE2D8]"] {
+            color: #B0C1D4 !important;
+        }
+
+        /* Focus & Rings */
+        .focus\:ring-\[\#1B4D3E\]:focus,
+        .focus\:border-\[\#214A35\]:focus {
+            border-color: #3E5C76 !important;
+            --tw-ring-color: #3E5C76 !important;
+        }
+
+        /* Action Buttons & Badges across Details & Admin tools */
+        .bg-emerald-800, [class*="bg-emerald-800"] {
+            background-color: #1D2D44 !important;
+        }
+        .hover\:bg-emerald-900:hover {
+            background-color: #0D1321 !important;
+        }
+        .text-emerald-800, [class*="text-emerald-800"] {
+            color: #3E5C76 !important;
+        }
+        .bg-purple-700, [class*="bg-purple-700"] {
+            background-color: #3E5C76 !important;
+        }
+        .hover\:bg-purple-800:hover {
+            background-color: #1D2D44 !important;
+        }
+        .bg-emerald-100 {
+            background-color: rgba(116, 140, 171, 0.20) !important;
+            color: #1D2D44 !important;
+            border-color: #748CAB !important;
+        }
+        input[type="checkbox"], input[type="radio"] {
+            accent-color: #1D2D44;
+        }
+
+        /* ================= COMPREHENSIVE DARK MODE: INK BLACK & SPACE BLUE ================= */
         html.dark {
             color-scheme: dark;
         }
         html.dark, html.dark body {
-            background-color: #0c1711 !important;
-            color: #eaf0e8 !important;
+            background-color: #0D1321 !important;
+            color: #F0EBD8 !important;
+        }
+        html.dark aside {
+            background-color: #090E18 !important;
+            border-right: 1px solid #1D2D44 !important;
+        }
+        html.dark .bg-white {
+            background-color: #151F30 !important;
+            color: #F0EBD8 !important;
+            border-color: #23334D !important;
         }
         html.dark .bg-\[\#F6F4EC\],
         html.dark [class*="bg-[#F6F4EC]"] {
-            background-color: #0c1711 !important;
-        }
-        html.dark .bg-white {
-            background-color: #13241b !important;
-            color: #eaf0e8 !important;
-            border-color: #213c2c !important;
+            background-color: #0D1321 !important;
         }
         html.dark .bg-\[\#EAF0E8\],
         html.dark [class*="bg-[#EAF0E8]"] {
-            background-color: #172d21 !important;
-            color: #d6e4d8 !important;
+            background-color: #1B293E !important;
+            color: #D5DFEC !important;
+            border-color: #2B3F5D !important;
         }
         html.dark .bg-\[\#F2F5EF\],
         html.dark [class*="bg-[#F2F5EF]"] {
-            background-color: #15291f !important;
+            background-color: #172437 !important;
         }
-        html.dark .bg-\[\#FBF1EC\] {
-            background-color: #2b1510 !important;
-            border-color: #592419 !important;
-            color: #f4c2b7 !important;
+        html.dark .bg-\[\#1B3B2B\],
+        html.dark .bg-\[\#152E22\],
+        html.dark .bg-\[\#1B4D3E\] {
+            background-color: #1D2D44 !important;
+        }
+        html.dark .bg-\[\#214A35\] {
+            background-color: #3E5C76 !important;
+        }
+        html.dark .hover\:bg-\[\#183828\]:hover {
+            background-color: #4E7292 !important;
         }
         html.dark .border-\[\#DCE2D8\],
         html.dark .border-\[\#C9D6C5\],
         html.dark .border-\[\#E2DEC9\] {
-            border-color: #213c2c !important;
+            border-color: #23334D !important;
         }
         html.dark .divide-\[\#DCE2D8\] > :not([hidden]) ~ :not([hidden]) {
-            border-color: #213c2c !important;
+            border-color: #23334D !important;
         }
         html.dark .text-\[\#16211A\],
-        html.dark .text-\[\#1B3B2B\] {
-            color: #eaf0e8 !important;
+        html.dark .text-\[\#1B3B2B\],
+        html.dark .text-\[\#1B4D3E\] {
+            color: #F0EBD8 !important;
         }
         html.dark .text-\[\#45544B\] {
-            color: #adc1b2 !important;
+            color: #B0C1D4 !important;
         }
         html.dark .text-\[\#66756B\],
         html.dark .text-\[\#526058\] {
-            color: #89a08f !important;
+            color: #748CAB !important;
         }
         html.dark .text-\[\#214A35\],
         html.dark .text-\[\#2F6347\] {
-            color: #6bbe8c !important;
+            color: #8FA3BD !important;
         }
         html.dark input,
         html.dark select,
         html.dark textarea {
-            background-color: #102117 !important;
-            color: #eaf0e8 !important;
-            border-color: #284735 !important;
+            background-color: #0F1724 !important;
+            color: #F0EBD8 !important;
+            border-color: #23334D !important;
         }
         html.dark input::placeholder,
         html.dark textarea::placeholder {
-            color: #667e6e !important;
+            color: #56708F !important;
         }
-        html.dark .hover\:bg-\[\#EAF0E8\]\/50:hover {
-            background-color: rgba(23, 45, 33, 0.6) !important;
-        }
+        html.dark .hover\:bg-\[\#EAF0E8\]\/50:hover,
         html.dark tr.hover\:bg-\[\#EAF0E8\]\/50:hover td {
-            background-color: rgba(23, 45, 33, 0.6) !important;
+            background-color: rgba(62, 92, 118, 0.25) !important;
         }
         html.dark .bg-\[\#F6F4EC\] table thead,
         html.dark table thead.bg-\[\#F6F4EC\] {
-            background-color: #102117 !important;
+            background-color: #0F1724 !important;
+            color: #8FA3BD !important;
+            border-color: #23334D !important;
+        }
+        html.dark .text-emerald-800, html.dark [class*="text-emerald-800"] {
+            color: #8FA3BD !important;
+        }
+        html.dark .bg-emerald-800, html.dark [class*="bg-emerald-800"] {
+            background-color: #3E5C76 !important;
+        }
+        html.dark .hover\:bg-emerald-900:hover {
+            background-color: #1D2D44 !important;
+        }
+        html.dark .bg-purple-700, html.dark [class*="bg-purple-700"] {
+            background-color: #3E5C76 !important;
+        }
+        html.dark .hover\:bg-purple-800:hover {
+            background-color: #1D2D44 !important;
+        }
+        html.dark .bg-emerald-100 {
+            background-color: rgba(62, 92, 118, 0.35) !important;
+            color: #D5DFEC !important;
+            border-color: #3E5C76 !important;
+        }
+        html.dark input[type="checkbox"], html.dark input[type="radio"] {
+            accent-color: #3E5C76;
         }
 
         /* Ambient Transitions & Animation System */
@@ -189,14 +358,14 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-[#F6F4EC] text-[#16211A] overflow-x-hidden">
-    <div class="min-h-screen bg-[#F6F4EC] text-[#16211A] flex flex-col lg:flex-row overflow-x-hidden">
+<body class="min-h-screen bg-[#F0EBD8] text-[#0D1321] overflow-x-hidden">
+    <div class="min-h-screen bg-[#F0EBD8] text-[#0D1321] flex flex-col lg:flex-row overflow-x-hidden">
         <!-- Sidebar -->
-        <aside class="lg:w-64 bg-[#1B3B2B] text-white flex flex-col justify-between shrink-0">
+        <aside class="lg:w-64 bg-[#1D2D44] text-[#F0EBD8] flex flex-col justify-between shrink-0 border-r border-[#0D1321]/30">
             <div class="p-6 space-y-6">
                 <div>
-                    <span class="font-serif text-2xl font-semibold tracking-tight block">sagip</span>
-                    <span class="text-[11px] uppercase tracking-widest text-[#C9D6C5]">
+                    <span class="font-serif text-2xl font-semibold tracking-tight block text-[#F0EBD8]">sagip</span>
+                    <span class="text-[11px] uppercase tracking-widest text-[#748CAB]">
                         @(currentController == "Admin" ? "System Administration" : "VAWC Desk Workspace")
                     </span>
                 </div>
@@ -204,32 +373,32 @@
                 @if (currentController == "Admin")
                 {
                     <nav class="space-y-1 text-sm" aria-label="Administrator navigation">
-                        <a href="@Url.Action("Index", "Admin", new { tab = "staff" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "staff" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "staff" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "staff" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Staff accounts
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Support contacts
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "settings" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "settings" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "settings" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "settings" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             System settings
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "audit" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "audit" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "audit" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "audit" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Audit logs
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Anonymized statistics
                         </a>
                     </nav>
 
                     <!-- Strict RBAC Proof Guard -->
                     <div class="pt-4 border-t border-white/10 space-y-2">
-                        <p class="text-[11px] text-[#C9D6C5] leading-relaxed">
+                        <p class="text-[11px] text-[#748CAB] leading-relaxed">
                             Administrators have no access to case narratives or reporter identities.
                         </p>
                         <form asp-controller="Admin" asp-action="AttemptCaseAccess" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="caseNumber" value="C-026-041" />
-                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 text-[11px] text-[#DCE2D8] hover:bg-white/10 cursor-pointer">
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 text-[11px] text-[#D5DFEC] hover:bg-white/10 cursor-pointer">
                                 <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i>
                                 <span>Test case access guard</span>
                             </button>
@@ -239,19 +408,19 @@
                 else
                 {
                     <nav class="space-y-1 text-sm" aria-label="Desk workspace navigation">
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "overview" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "overview" && currentAction != "Details" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "overview" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "overview" && currentAction != "Details" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Overview
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "all" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "all" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "all" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "all" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             All cases
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "mine" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "mine" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "mine" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "mine" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Assigned to me
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Anonymized statistics
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#214A35] text-white font-semibold" : "text-[#DCE2D8] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
                             Support contacts
                         </a>
                     </nav>
@@ -260,21 +429,21 @@
 
             <div class="p-6 border-t border-white/10 space-y-3 text-xs">
                 <div>
-                    <p class="text-[#C9D6C5] uppercase tracking-wider text-[10px]">@(currentController == "Admin" ? "Administrator" : "Desk officer")</p>
-                    <p class="font-semibold text-white mt-0.5">@staffName</p>
-                    <p class="text-[#DCE2D8]">@staffEmail</p>
+                    <p class="text-[#748CAB] uppercase tracking-wider text-[10px]">@(currentController == "Admin" ? "Administrator" : "Desk officer")</p>
+                    <p class="font-semibold text-[#F0EBD8] mt-0.5">@staffName</p>
+                    <p class="text-[#D5DFEC]">@staffEmail</p>
                 </div>
                 <div class="flex flex-col items-start gap-2 pt-1">
-                    <button type="button" onclick="toggleTheme()" class="inline-flex items-center gap-2 text-[#C9D6C5] hover:text-white cursor-pointer py-1">
+                    <button type="button" onclick="toggleTheme()" class="inline-flex items-center gap-2 text-[#748CAB] hover:text-[#F0EBD8] cursor-pointer py-1">
                         <span class="relative w-3.5 h-3.5 flex items-center justify-center shrink-0 overflow-hidden">
                             <i data-lucide="sun" id="staff-theme-icon-sun" class="celestial-morph-icon w-3.5 h-3.5 absolute text-amber-300 transform scale-100 rotate-0 opacity-100"></i>
-                            <i data-lucide="moon" id="staff-theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#C9D6C5] transform scale-0 -rotate-90 opacity-0"></i>
+                            <i data-lucide="moon" id="staff-theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#748CAB] transform scale-0 -rotate-90 opacity-0"></i>
                         </span>
                         <span id="staff-theme-text">Light mode</span>
                     </button>
                     <form asp-controller="Staff" asp-action="Logout" method="post" class="w-full">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="inline-flex items-center gap-1.5 text-[#DCE2D8] hover:text-white cursor-pointer">
+                        <button type="submit" class="inline-flex items-center gap-1.5 text-[#D5DFEC] hover:text-[#F0EBD8] cursor-pointer">
                             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                             <span>Sign out</span>
                         </button>
@@ -287,13 +456,13 @@
         <main class="flex-1 p-6 sm:p-8 lg:p-10 max-w-6xl">
             @if (TempData["SuccessMessage"] != null)
             {
-                <div role="alert" class="rounded-xl px-4 py-3 text-xs font-medium bg-[#EAF0E8] border border-[#C9D6C5] text-[#1B3B2B] mb-6">
+                <div role="alert" class="rounded-xl px-4 py-3 text-xs font-medium bg-[#1D2D44]/10 border border-[#3E5C76]/30 text-[#1D2D44] mb-6">
                     @TempData["SuccessMessage"]
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                <div role="alert" class="rounded-xl px-4 py-3 text-xs font-medium bg-[#FBF1EC] border border-[#E6C8BC] text-[#8A3422] mb-6">
+                <div role="alert" class="rounded-xl px-4 py-3 text-xs font-medium bg-[#8A3422]/10 border border-[#8A3422]/30 text-[#8A3422] mb-6">
                     @TempData["ErrorMessage"]
                 </div>
             }
