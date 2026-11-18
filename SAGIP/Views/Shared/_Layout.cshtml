@@ -281,6 +281,23 @@
             font-weight: 700 !important;
         }
 
+        /* Direct ID-level rule guarantee for 911 & disclaimer cards in Dark Mode */
+        html.dark #emergency-911-card,
+        html.dark #emergency-911-card *,
+        html.dark #rights-disclaimer-card,
+        html.dark #rights-disclaimer-card * {
+            color: #FFFFFF !important;
+        }
+        html.dark #emergency-911-card p:last-child,
+        html.dark #rights-disclaimer-card p:last-child {
+            color: #E8D7D3 !important;
+        }
+        html.dark #emergency-911-card .tabular-nums,
+        html.dark #emergency-911-card p:first-child {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+        }
+
         /* Navigation Links in Dark Mode */
         html.dark nav a {
             color: #C5B5B0 !important;
