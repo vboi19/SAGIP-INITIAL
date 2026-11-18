@@ -76,6 +76,11 @@
             overflow-x: hidden;
             max-width: 100vw;
         }
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y proximity;
+            scroll-padding-top: 76px;
+        }
         body {
             font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
             color: #291D1D;
@@ -94,6 +99,16 @@
         }
         .tabular-nums {
             font-variant-numeric: tabular-nums;
+        }
+
+        /* CSS Scroll Snap System (Magnetic proximity alignment) */
+        .scroll-snap-section {
+            scroll-snap-align: start;
+            scroll-snap-stop: normal;
+        }
+        .scroll-snap-center {
+            scroll-snap-align: center;
+            scroll-snap-stop: normal;
         }
 
         /* ================= PALETTE: WARM COFFEE & ROSE CLAY =================
@@ -254,7 +269,7 @@
         html.dark .bg-\[\#1B3B2B\] {
             background-color: #1E1313 !important;
         }
-        /* 911 Emergency Card in Dark Mode matching Barangay Desk white text style */
+        /* 911 Emergency Card & Disclaimer Card in Dark Mode matching Barangay Desk white text style */
         html.dark .bg-\[\#FBF1EC\],
         html.dark .bg-\[\#fbf1ec\],
         html.dark [class*="bg-[#fbf1ec]" i] {
@@ -269,33 +284,23 @@
         }
         html.dark [class*="bg-[#fbf1ec]" i] *,
         html.dark [class*="bg-[#fbf1ec]" i] p,
-        html.dark [class*="bg-[#fbf1ec]" i] span {
+        html.dark [class*="bg-[#fbf1ec]" i] span,
+        html.dark [class*="bg-[#fbf1ec]" i] div {
             color: #FFFFFF !important;
-        }
-        html.dark [class*="bg-[#fbf1ec]" i] p:last-child {
-            color: #E8D7D3 !important;
-        }
-        html.dark [class*="bg-[#fbf1ec]" i] .tabular-nums,
-        html.dark [class*="bg-[#fbf1ec]" i] p:first-child {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
         }
 
-        /* Direct ID-level rule guarantee for 911 & disclaimer cards in Dark Mode */
+        /* Direct ID-level rule guarantee for 911 & disclaimer cards in Dark Mode: 100% pure white */
         html.dark #emergency-911-card,
         html.dark #emergency-911-card *,
+        html.dark #emergency-911-card p,
+        html.dark #emergency-911-card span,
+        html.dark #emergency-911-card div,
         html.dark #rights-disclaimer-card,
-        html.dark #rights-disclaimer-card * {
+        html.dark #rights-disclaimer-card *,
+        html.dark #rights-disclaimer-card p,
+        html.dark #rights-disclaimer-card span,
+        html.dark #rights-disclaimer-card div {
             color: #FFFFFF !important;
-        }
-        html.dark #emergency-911-card p:last-child,
-        html.dark #rights-disclaimer-card p:last-child {
-            color: #E8D7D3 !important;
-        }
-        html.dark #emergency-911-card .tabular-nums,
-        html.dark #emergency-911-card p:first-child {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
         }
 
         /* Navigation Links in Dark Mode */
@@ -471,6 +476,13 @@
         }
 
         @@media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-snap-type: none !important;
+                scroll-behavior: auto !important;
+            }
+            .scroll-snap-section, .scroll-snap-center {
+                scroll-snap-align: none !important;
+            }
             .hinga-arcs-container, .hinga-ring, .hinga-dot, .celestial-morph-icon, .step-pane-enter,
             .status-dot-pulse, .primary-desk-halo,
             body, header, aside, main, footer {
