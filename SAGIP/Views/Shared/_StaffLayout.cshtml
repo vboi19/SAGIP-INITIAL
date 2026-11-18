@@ -58,26 +58,26 @@
                         },
                         slate: {
                             DEFAULT: '#3E5C76',
-                            700: '#334C62',
+                            700: '#27374D',
                             600: '#3E5C76',
-                            500: '#4E7292',
+                            500: '#526D82',
                         },
                         denim: {
                             DEFAULT: '#748CAB',
                             400: '#748CAB',
-                            300: '#8FA3BD',
+                            300: '#9DB2BF',
                             200: '#B0C1D4',
-                            100: '#D5DFEC',
+                            100: '#DDE6ED',
                         },
-                        eggshell: {
-                            DEFAULT: '#F0EBD8',
-                            50: '#FAF8F3',
-                            100: '#F5F1E5',
-                            200: '#F0EBD8',
-                            300: '#E4DCBF',
-                            400: '#D5C9A4',
+                        iceslate: {
+                            DEFAULT: '#DDE6ED',
+                            50: '#F5F7FA',
+                            100: '#EBF0F5',
+                            200: '#DDE6ED',
+                            300: '#CDD9E4',
+                            400: '#B8C8D6',
                         },
-                        canvas: '#F0EBD8',
+                        canvas: '#DDE6ED',
                         surface: '#FFFFFF',
                     },
                     fontFamily: {
@@ -97,17 +97,17 @@
             max-width: 100vw;
         }
 
-        /* ================= PALETTE: DEEP SPACE & BLUE SLATE =================
+        /* ================= PALETTE: DEEP SPACE & COOL ICE SLATE =================
            #0D1321 - Ink Black
-           #1D2D44 - Deep Space Blue
-           #3E5C76 - Blue Slate
-           #748CAB - Dusty Denim
-           #F0EBD8 - Eggshell
+           #1D2D44 / #27374D - Deep Navy / Space Blue
+           #3E5C76 / #526D82 - Steel Slate
+           #748CAB / #9DB2BF - Soft Mist / Cool Denim
+           #DDE6ED - Pale Ice Slate (Canvas)
         */
 
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background-color: #F0EBD8 !important;
+            background-color: #DDE6ED !important;
             color: #0D1321 !important;
         }
         .font-serif {
@@ -122,7 +122,7 @@
 
         /* Canvas / Main backgrounds */
         .bg-\[\#F6F4EC\], [class*="bg-[#F6F4EC]"] {
-            background-color: #F0EBD8 !important;
+            background-color: #DDE6ED !important;
         }
         
         /* Deep Space Blue: Sidebar, primary desk headers & cards */
@@ -143,30 +143,30 @@
             background-color: #0D1321 !important;
         }
 
-        /* Soft Denim Tinted Containers */
+        /* Soft Mist Tinted Containers */
         .bg-\[\#EAF0E8\], [class*="bg-[#EAF0E8]"],
         .bg-\[\#F2F5EF\], [class*="bg-[#F2F5EF]"] {
-            background-color: rgba(116, 140, 171, 0.16) !important;
+            background-color: rgba(157, 178, 191, 0.22) !important;
         }
         .hover\:bg-\[\#EAF0E8\]\/50:hover, tr.hover\:bg-\[\#EAF0E8\]\/50:hover td {
-            background-color: rgba(116, 140, 171, 0.20) !important;
+            background-color: rgba(157, 178, 191, 0.28) !important;
         }
 
-        /* Table Headers in Light Mode: Soft Eggshell Tone */
+        /* Table Headers in Light Mode: Crisp Ice Slate Tone */
         .bg-\[\#F6F4EC\] table thead, table thead.bg-\[\#F6F4EC\] {
-            background-color: #E6DFC9 !important;
+            background-color: #CDD9E4 !important;
             color: #1D2D44 !important;
-            border-color: rgba(116, 140, 171, 0.35) !important;
+            border-color: rgba(157, 178, 191, 0.45) !important;
         }
 
         /* Hairlines, Dividers & Card Outlines */
         .border-\[\#DCE2D8\], [class*="border-[#DCE2D8]"],
         .border-\[\#C9D6C5\], [class*="border-[#C9D6C5]"],
         .border-\[\#E2DEC9\], [class*="border-[#E2DEC9]"] {
-            border-color: rgba(116, 140, 171, 0.35) !important;
+            border-color: rgba(157, 178, 191, 0.40) !important;
         }
         .divide-\[\#DCE2D8\] > :not([hidden]) ~ :not([hidden]) {
-            border-color: rgba(116, 140, 171, 0.35) !important;
+            border-color: rgba(157, 178, 191, 0.40) !important;
         }
         .border-\[\#214A35\], [class*="border-[#214A35]"],
         .border-\[\#1B3B2B\], [class*="border-[#1B3B2B]"],
@@ -187,11 +187,11 @@
             color: #1D2D44 !important;
         }
         .text-\[\#45544B\], [class*="text-[#45544B]"] {
-            color: #2D415A !important;
+            color: #27374D !important;
         }
         .text-\[\#66756B\], [class*="text-[#66756B]"],
         .text-\[\#526058\], [class*="text-[#526058]"] {
-            color: #556E8B !important;
+            color: #526D82 !important;
         }
         .text-\[\#C9D6C5\], [class*="text-[#C9D6C5]"],
         .text-\[\#DCE2D8\], [class*="text-[#DCE2D8]"] {
@@ -222,9 +222,9 @@
             background-color: #1D2D44 !important;
         }
         .bg-emerald-100 {
-            background-color: rgba(116, 140, 171, 0.20) !important;
+            background-color: rgba(157, 178, 191, 0.25) !important;
             color: #1D2D44 !important;
-            border-color: #748CAB !important;
+            border-color: #9DB2BF !important;
         }
         input[type="checkbox"], input[type="radio"] {
             accent-color: #1D2D44;
@@ -236,7 +236,7 @@
         }
         html.dark, html.dark body {
             background-color: #0D1321 !important;
-            color: #F0EBD8 !important;
+            color: #DDE6ED !important;
         }
         html.dark aside {
             background-color: #090E18 !important;
@@ -244,7 +244,7 @@
         }
         html.dark .bg-white {
             background-color: #151F30 !important;
-            color: #F0EBD8 !important;
+            color: #DDE6ED !important;
             border-color: #23334D !important;
         }
         html.dark .bg-\[\#F6F4EC\],
@@ -254,7 +254,7 @@
         html.dark .bg-\[\#EAF0E8\],
         html.dark [class*="bg-[#EAF0E8]"] {
             background-color: #1B293E !important;
-            color: #D5DFEC !important;
+            color: #DDE6ED !important;
             border-color: #2B3F5D !important;
         }
         html.dark .bg-\[\#F2F5EF\],
@@ -283,29 +283,29 @@
         html.dark .text-\[\#16211A\],
         html.dark .text-\[\#1B3B2B\],
         html.dark .text-\[\#1B4D3E\] {
-            color: #F0EBD8 !important;
+            color: #DDE6ED !important;
         }
         html.dark .text-\[\#45544B\] {
             color: #B0C1D4 !important;
         }
         html.dark .text-\[\#66756B\],
         html.dark .text-\[\#526058\] {
-            color: #748CAB !important;
+            color: #9DB2BF !important;
         }
         html.dark .text-\[\#214A35\],
         html.dark .text-\[\#2F6347\] {
-            color: #8FA3BD !important;
+            color: #9DB2BF !important;
         }
         html.dark input,
         html.dark select,
         html.dark textarea {
             background-color: #0F1724 !important;
-            color: #F0EBD8 !important;
+            color: #DDE6ED !important;
             border-color: #23334D !important;
         }
         html.dark input::placeholder,
         html.dark textarea::placeholder {
-            color: #56708F !important;
+            color: #526D82 !important;
         }
         html.dark .hover\:bg-\[\#EAF0E8\]\/50:hover,
         html.dark tr.hover\:bg-\[\#EAF0E8\]\/50:hover td {
@@ -314,11 +314,11 @@
         html.dark .bg-\[\#F6F4EC\] table thead,
         html.dark table thead.bg-\[\#F6F4EC\] {
             background-color: #0F1724 !important;
-            color: #8FA3BD !important;
+            color: #9DB2BF !important;
             border-color: #23334D !important;
         }
         html.dark .text-emerald-800, html.dark [class*="text-emerald-800"] {
-            color: #8FA3BD !important;
+            color: #9DB2BF !important;
         }
         html.dark .bg-emerald-800, html.dark [class*="bg-emerald-800"] {
             background-color: #3E5C76 !important;
@@ -334,7 +334,7 @@
         }
         html.dark .bg-emerald-100 {
             background-color: rgba(62, 92, 118, 0.35) !important;
-            color: #D5DFEC !important;
+            color: #DDE6ED !important;
             border-color: #3E5C76 !important;
         }
         html.dark input[type="checkbox"], html.dark input[type="radio"] {
@@ -358,14 +358,14 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-[#F0EBD8] text-[#0D1321] overflow-x-hidden">
-    <div class="min-h-screen bg-[#F0EBD8] text-[#0D1321] flex flex-col lg:flex-row overflow-x-hidden">
+<body class="min-h-screen bg-[#DDE6ED] text-[#0D1321] overflow-x-hidden">
+    <div class="min-h-screen bg-[#DDE6ED] text-[#0D1321] flex flex-col lg:flex-row overflow-x-hidden">
         <!-- Sidebar -->
-        <aside class="lg:w-64 bg-[#1D2D44] text-[#F0EBD8] flex flex-col justify-between shrink-0 border-r border-[#0D1321]/30">
+        <aside class="lg:w-64 bg-[#1D2D44] text-[#DDE6ED] flex flex-col justify-between shrink-0 border-r border-[#0D1321]/30">
             <div class="p-6 space-y-6">
                 <div>
-                    <span class="font-serif text-2xl font-semibold tracking-tight block text-[#F0EBD8]">sagip</span>
-                    <span class="text-[11px] uppercase tracking-widest text-[#748CAB]">
+                    <span class="font-serif text-2xl font-semibold tracking-tight block text-[#DDE6ED]">sagip</span>
+                    <span class="text-[11px] uppercase tracking-widest text-[#9DB2BF]">
                         @(currentController == "Admin" ? "System Administration" : "VAWC Desk Workspace")
                     </span>
                 </div>
@@ -373,32 +373,32 @@
                 @if (currentController == "Admin")
                 {
                     <nav class="space-y-1 text-sm" aria-label="Administrator navigation">
-                        <a href="@Url.Action("Index", "Admin", new { tab = "staff" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "staff" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "staff" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "staff" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Staff accounts
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Support contacts
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "settings" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "settings" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "settings" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "settings" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             System settings
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "audit" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "audit" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "audit" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "audit" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Audit logs
                         </a>
-                        <a href="@Url.Action("Index", "Admin", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "Admin", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Anonymized statistics
                         </a>
                     </nav>
 
                     <!-- Strict RBAC Proof Guard -->
                     <div class="pt-4 border-t border-white/10 space-y-2">
-                        <p class="text-[11px] text-[#748CAB] leading-relaxed">
+                        <p class="text-[11px] text-[#9DB2BF] leading-relaxed">
                             Administrators have no access to case narratives or reporter identities.
                         </p>
                         <form asp-controller="Admin" asp-action="AttemptCaseAccess" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="caseNumber" value="C-026-041" />
-                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 text-[11px] text-[#D5DFEC] hover:bg-white/10 cursor-pointer">
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 text-[11px] text-[#DDE6ED] hover:bg-white/10 cursor-pointer">
                                 <i data-lucide="shield-ban" class="w-3.5 h-3.5"></i>
                                 <span>Test case access guard</span>
                             </button>
@@ -408,19 +408,19 @@
                 else
                 {
                     <nav class="space-y-1 text-sm" aria-label="Desk workspace navigation">
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "overview" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "overview" && currentAction != "Details" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "overview" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "overview" && currentAction != "Details" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Overview
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "all" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "all" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "all" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "all" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             All cases
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "mine" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "mine" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "mine" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "mine" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Assigned to me
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "stats" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "stats" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Anonymized statistics
                         </a>
-                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#F0EBD8] font-semibold shadow-xs" : "text-[#D5DFEC] hover:bg-white/10 hover:text-white")">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = "contacts" })" class="block w-full text-left px-3 py-2 rounded-lg transition-colors cursor-pointer @(activeTab == "contacts" ? "bg-[#3E5C76] text-[#DDE6ED] font-semibold shadow-xs" : "text-[#DDE6ED]/80 hover:bg-white/10 hover:text-white")">
                             Support contacts
                         </a>
                     </nav>
@@ -429,21 +429,21 @@
 
             <div class="p-6 border-t border-white/10 space-y-3 text-xs">
                 <div>
-                    <p class="text-[#748CAB] uppercase tracking-wider text-[10px]">@(currentController == "Admin" ? "Administrator" : "Desk officer")</p>
-                    <p class="font-semibold text-[#F0EBD8] mt-0.5">@staffName</p>
-                    <p class="text-[#D5DFEC]">@staffEmail</p>
+                    <p class="text-[#9DB2BF] uppercase tracking-wider text-[10px]">@(currentController == "Admin" ? "Administrator" : "Desk officer")</p>
+                    <p class="font-semibold text-[#DDE6ED] mt-0.5">@staffName</p>
+                    <p class="text-[#DDE6ED]/70">@staffEmail</p>
                 </div>
                 <div class="flex flex-col items-start gap-2 pt-1">
-                    <button type="button" onclick="toggleTheme()" class="inline-flex items-center gap-2 text-[#748CAB] hover:text-[#F0EBD8] cursor-pointer py-1">
+                    <button type="button" onclick="toggleTheme()" class="inline-flex items-center gap-2 text-[#9DB2BF] hover:text-[#DDE6ED] cursor-pointer py-1">
                         <span class="relative w-3.5 h-3.5 flex items-center justify-center shrink-0 overflow-hidden">
                             <i data-lucide="sun" id="staff-theme-icon-sun" class="celestial-morph-icon w-3.5 h-3.5 absolute text-amber-300 transform scale-100 rotate-0 opacity-100"></i>
-                            <i data-lucide="moon" id="staff-theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#748CAB] transform scale-0 -rotate-90 opacity-0"></i>
+                            <i data-lucide="moon" id="staff-theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#9DB2BF] transform scale-0 -rotate-90 opacity-0"></i>
                         </span>
                         <span id="staff-theme-text">Light mode</span>
                     </button>
                     <form asp-controller="Staff" asp-action="Logout" method="post" class="w-full">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="inline-flex items-center gap-1.5 text-[#D5DFEC] hover:text-[#F0EBD8] cursor-pointer">
+                        <button type="submit" class="inline-flex items-center gap-1.5 text-[#DDE6ED]/80 hover:text-[#DDE6ED] cursor-pointer">
                             <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                             <span>Sign out</span>
                         </button>
