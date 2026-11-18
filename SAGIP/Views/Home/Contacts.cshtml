@@ -27,16 +27,16 @@
                     ? $"Offices and hours are verified and published by the {settings.BarangayName} administrator. Click any office below to view operating hours and address."
                     : $"Ang mga tanggapan at oras ng serbisyo ay pinamamahalaan ng tagapangasiwa ng {settings.BarangayName}. Pindutin ang tanggapan para sa mga detalye.")
             </p>
-            <div class="inline-flex rounded-lg border border-[#DCE2D8] bg-white p-1">
+            <div class="lang-toggle-pill inline-flex rounded-lg p-1">
                 <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
                     <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                    <button type="submit" name="lang" value="en" class="px-3 py-1 rounded-md text-xs font-semibold cursor-pointer @(language == "en" ? "bg-[#214A35] text-white" : "text-[#45544B]")">
+                    <button type="submit" name="lang" value="en" class="px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all @(language == "en" ? "lang-toggle-btn-active" : "lang-toggle-btn-inactive")">
                         English
                     </button>
                 </form>
                 <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
                     <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                    <button type="submit" name="lang" value="fil" class="px-3 py-1 rounded-md text-xs font-semibold cursor-pointer @(language == "fil" ? "bg-[#214A35] text-white" : "text-[#45544B]")">
+                    <button type="submit" name="lang" value="fil" class="px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all @(language == "fil" ? "lang-toggle-btn-active" : "lang-toggle-btn-inactive")">
                         Filipino
                     </button>
                 </form>

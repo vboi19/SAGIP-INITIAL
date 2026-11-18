@@ -235,6 +235,26 @@
             animation: deskActiveHalo 3.5s ease-in-out infinite;
         }
 
+        /* Language Toggle Pill - High contrast in both Light & Dark modes */
+        .lang-toggle-pill {
+            background-color: #472D2D !important;
+            border: 1px solid #553939 !important;
+        }
+        .lang-toggle-btn-active {
+            background-color: #FFFFFF !important;
+            color: #291D1D !important;
+            font-weight: 700 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        }
+        .lang-toggle-btn-inactive {
+            background-color: transparent !important;
+            color: #DECBC6 !important;
+            font-weight: 500 !important;
+        }
+        .lang-toggle-btn-inactive:hover {
+            color: #FFFFFF !important;
+        }
+
         /* ================= DARK MODE COCOA PALETTE ================= */
         html.dark {
             color-scheme: dark;
@@ -242,6 +262,26 @@
         html.dark, html.dark body {
             background-color: #1A1212 !important;
             color: #F5ECE8 !important;
+        }
+
+        /* Language Toggle Pill in Dark Mode: Glowing readable active pill & clear inactive label */
+        html.dark .lang-toggle-pill {
+            background-color: #241515 !important;
+            border: 1px solid #553939 !important;
+        }
+        html.dark .lang-toggle-btn-active {
+            background-color: #F8F4F0 !important;
+            color: #1A1212 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+        }
+        html.dark .lang-toggle-btn-inactive {
+            background-color: transparent !important;
+            color: #B5A09A !important;
+            font-weight: 500 !important;
+        }
+        html.dark .lang-toggle-btn-inactive:hover {
+            color: #FFFFFF !important;
         }
         html.dark .bg-\[\#F6F4EC\],
         html.dark [class*="bg-[#F6F4EC]"] {
@@ -494,16 +534,16 @@
                 </button>
 
                 <!-- Language Pill Toggle -->
-                <div class="inline-flex items-center rounded-md bg-[#1B3B2B] p-0.5 border border-[#2F6347]/70" role="group" aria-label="Language">
+                <div class="lang-toggle-pill inline-flex items-center rounded-lg p-0.5" role="group" aria-label="Language">
                     <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
                         <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                        <button type="submit" name="lang" value="en" class="px-2 py-0.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer @(!isFil ? "bg-[#F6F4EC] text-[#152E22]" : "text-[#C8DEC9] hover:text-white")">
+                        <button type="submit" name="lang" value="en" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 cursor-pointer @(!isFil ? "lang-toggle-btn-active" : "lang-toggle-btn-inactive")">
                             EN
                         </button>
                     </form>
                     <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
                         <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                        <button type="submit" name="lang" value="fil" class="px-2 py-0.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer @(isFil ? "bg-[#F6F4EC] text-[#152E22]" : "text-[#C8DEC9] hover:text-white")">
+                        <button type="submit" name="lang" value="fil" class="px-2.5 py-0.5 text-[11px] font-semibold rounded-md transition-all whitespace-nowrap shrink-0 cursor-pointer @(isFil ? "lang-toggle-btn-active" : "lang-toggle-btn-inactive")">
                             FIL
                         </button>
                     </form>
