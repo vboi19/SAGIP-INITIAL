@@ -11,21 +11,21 @@
         .ToList();
 }
 
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div class="lg:col-span-7 space-y-3">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
                 @(language == "en" ? "Support contacts" : "Mga tanggapang tutulong")
             </p>
-            <h1 class="font-serif text-4xl font-semibold text-[#16211A]">
+            <h1 class="font-serif text-3xl sm:text-4xl font-semibold text-[#16211A]">
                 @(language == "en"
                     ? "People who can help, near you."
                     : "Mga tanggapang makakatulong, malapit sa iyo.")
             </h1>
             <p class="text-sm text-[#45544B] leading-relaxed">
                 @(language == "en"
-                    ? $"Offices and hours are verified and published by the {settings.BarangayName} administrator. Available in English and Filipino."
-                    : $"Ang mga tanggapan at oras ng serbisyo ay pinamamahalaan ng tagapangasiwa ng {settings.BarangayName}.")
+                    ? $"Offices and hours are verified and published by the {settings.BarangayName} administrator. Click any office below to view operating hours and address."
+                    : $"Ang mga tanggapan at oras ng serbisyo ay pinamamahalaan ng tagapangasiwa ng {settings.BarangayName}. Pindutin ang tanggapan para sa mga detalye.")
             </p>
             <div class="inline-flex rounded-lg border border-[#DCE2D8] bg-white p-1">
                 <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
@@ -43,8 +43,8 @@
             </div>
         </div>
 
-        <div class="lg:col-span-5 bg-[#FBF1EC] border border-[#E6C8BC] rounded-2xl p-6 space-y-2">
-            <p class="font-serif text-4xl font-semibold text-[#8A3422] tabular-nums">911</p>
+        <div class="lg:col-span-5 bg-[#FBF1EC] border border-[#E6C8BC] rounded-2xl p-5 sm:p-6 space-y-2">
+            <p class="font-serif text-3xl sm:text-4xl font-semibold text-[#8A3422] tabular-nums">911</p>
             <p class="text-sm font-semibold text-[#8A3422]">
                 @(language == "en"
                     ? "In immediate danger? Call 911."
@@ -58,16 +58,32 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @foreach (var sc in activeContacts)
+    <!-- Quick controls -->
+    <div class="flex items-center justify-between text-xs text-[#66756B] pt-2 border-b border-[#DCE2D8] pb-3">
+        <span>@(language == "en" ? $"{activeContacts.Count} support offices available" : $"{activeContacts.Count} na mga tanggapan ang handang tumulong")</span>
+        <button type="button" onclick="toggleAllContactDetails()" id="toggleAllContactsBtn" class="font-semibold text-[#214A35] hover:underline cursor-pointer flex items-center gap-1">
+            <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5"></i>
+            <span id="toggleAllContactsText">@(language == "en" ? "Expand all details" : "Ipakita lahat")</span>
+        </button>
+    </div>
+
+    <!-- Contact Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        @for (int i = 0; i < activeContacts.Count; i++)
         {
-            <div class="rounded-2xl p-6 border space-y-4 transition-all duration-300 @(sc.ReceivesSagipReports ? "bg-[#1B3B2B] text-white border-[#1B3B2B] primary-desk-halo relative" : "bg-white text-[#16211A] border-[#DCE2D8] hover:shadow-xs")">
+            var sc = activeContacts[i];
+            var isPrimary = sc.ReceivesSagipReports;
+            var detailsId = $"contact-details-{i}";
+            var chevronId = $"contact-chevron-{i}";
+
+            <div class="rounded-2xl p-6 border space-y-4 transition-all duration-300 shadow-xs @(isPrimary ? "bg-[#1B3B2B] text-white border-[#1B3B2B] primary-desk-halo relative" : "bg-white text-[#16211A] border-[#DCE2D8] hover:border-[#214A35]")">
+                <!-- Header -->
                 <div class="space-y-1">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
-                        <p class="text-xs font-semibold uppercase tracking-wider @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#2F6347]")">
+                        <p class="text-xs font-semibold uppercase tracking-wider @(isPrimary ? "text-[#C8DEC9]" : "text-[#2F6347]")">
                             @(language == "en" ? sc.CategoryEn : sc.CategoryFil)
                         </p>
-                        @if (sc.ReceivesSagipReports)
+                        @if (isPrimary)
                         {
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] text-[#C8DEC9] font-mono border border-white/20">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -75,49 +91,119 @@
                             </span>
                         }
                     </div>
-                    <h2 class="font-serif text-xl font-semibold">
+                    <h2 class="font-serif text-xl sm:text-2xl font-semibold">
                         @(language == "en" ? sc.OfficeNameEn : sc.OfficeNameFil)
                     </h2>
-                    <p class="text-xs @(sc.ReceivesSagipReports ? "text-[#DCE6DA]" : "text-[#66756B]")">
+                    <p class="text-xs @(isPrimary ? "text-[#DCE6DA]" : "text-[#66756B]")">
                         @(language == "en" ? sc.OfficeNameFil : sc.OfficeNameEn)
                     </p>
                 </div>
 
-                @if (!string.IsNullOrEmpty(sc.GuidanceEn) || !string.IsNullOrEmpty(sc.GuidanceFil))
-                {
-                    <p class="text-xs leading-relaxed @(sc.ReceivesSagipReports ? "text-[#DCE6DA]" : "text-[#45544B]")">
-                        @(language == "en" ? sc.GuidanceEn : sc.GuidanceFil ?? sc.GuidanceEn)
-                    </p>
-                }
+                <!-- Primary phone always quick to tap -->
+                <div class="flex items-center justify-between pt-2 border-t @(isPrimary ? "border-white/15" : "border-[#DCE2D8]")">
+                    <div class="space-y-0.5">
+                        <p class="flex items-center gap-1 text-xs @(isPrimary ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                            <i data-lucide="phone-call" class="w-3.5 h-3.5 shrink-0"></i> @(language == "en" ? "Direct Phone" : "Telepono")
+                        </p>
+                        <a href="tel:@sc.Phone.Replace(" ", "").Replace("(", "").Replace(")", "").Replace("-", "")" class="font-mono font-semibold text-sm sm:text-base tabular-nums hover:underline @(isPrimary ? "text-white" : "text-[#1B3B2B]")">
+                            @sc.Phone
+                        </a>
+                    </div>
 
-                <div class="pt-4 border-t grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs @(sc.ReceivesSagipReports ? "border-white/15" : "border-[#DCE2D8]")">
-                    <div class="space-y-0.5">
-                        <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
-                            <i data-lucide="phone-call" class="w-3.5 h-3.5 shrink-0"></i> Phone
-                        </p>
-                        <p class="font-mono font-semibold text-sm tabular-nums break-words">@sc.Phone</p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
-                            <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> Hours
-                        </p>
-                        <p class="font-medium text-sm">
-                            @(language == "en" ? sc.HoursEn : sc.HoursFil)
-                        </p>
-                    </div>
-                    @if (!string.IsNullOrEmpty(sc.AddressEn) || !string.IsNullOrEmpty(sc.AddressFil))
+                    <!-- Accordion Dropdown Trigger for details -->
+                    <button type="button" onclick="toggleContactDetails('@detailsId', '@chevronId')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer @(isPrimary ? "bg-white/10 hover:bg-white/20 text-[#C8DEC9]" : "bg-[#F6F4EC] hover:bg-[#EAF0E8] text-[#214A35]")" aria-controls="@detailsId">
+                        <span>@(language == "en" ? "Hours & Address" : "Oras at Lokasyon")</span>
+                        <div id="@chevronId" class="transition-transform duration-300">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Collapsible Details Dropdown (Open by default on primary desk, closed on others to avoid info dumping) -->
+                <div id="@detailsId" class="@(isPrimary ? "" : "hidden") space-y-4 pt-3 border-t @(isPrimary ? "border-white/15" : "border-[#DCE2D8]")">
+                    @if (!string.IsNullOrEmpty(sc.GuidanceEn) || !string.IsNullOrEmpty(sc.GuidanceFil))
                     {
-                        <div class="sm:col-span-2 space-y-0.5 pt-1">
-                            <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0"></i> Address
+                        <p class="text-xs leading-relaxed @(isPrimary ? "text-[#DCE6DA]" : "text-[#45544B]")">
+                            @(language == "en" ? sc.GuidanceEn : sc.GuidanceFil ?? sc.GuidanceEn)
+                        </p>
+                    }
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="space-y-0.5">
+                            <p class="flex items-center gap-1 @(isPrimary ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> @(language == "en" ? "Hours" : "Mga Oras")
                             </p>
-                            <p class="text-xs font-medium">
-                                @(language == "en" ? sc.AddressEn : sc.AddressFil ?? sc.AddressEn)
+                            <p class="font-medium text-xs sm:text-sm">
+                                @(language == "en" ? sc.HoursEn : sc.HoursFil)
                             </p>
                         </div>
-                    }
+                        @if (!string.IsNullOrEmpty(sc.AddressEn) || !string.IsNullOrEmpty(sc.AddressFil))
+                        {
+                            <div class="space-y-0.5">
+                                <p class="flex items-center gap-1 @(isPrimary ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0"></i> @(language == "en" ? "Address" : "Tirahan / Lokasyon")
+                                </p>
+                                <p class="text-xs font-medium">
+                                    @(language == "en" ? sc.AddressEn : sc.AddressFil ?? sc.AddressEn)
+                                </p>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         }
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function toggleContactDetails(detailsId, chevronId) {
+        const el = document.getElementById(detailsId);
+        const ch = document.getElementById(chevronId);
+        if (!el) return;
+
+        const isHidden = el.classList.contains('hidden');
+        if (isHidden) {
+            el.classList.remove('hidden');
+            if (ch) ch.style.transform = 'rotate(180deg)';
+        } else {
+            el.classList.add('hidden');
+            if (ch) ch.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function toggleAllContactDetails() {
+        const count = @activeContacts.Count;
+        let anyHidden = false;
+
+        for (let i = 0; i < count; i++) {
+            const el = document.getElementById(`contact-details-${i}`);
+            if (el && el.classList.contains('hidden')) {
+                anyHidden = true;
+                break;
+            }
+        }
+
+        for (let i = 0; i < count; i++) {
+            const el = document.getElementById(`contact-details-${i}`);
+            const ch = document.getElementById(`contact-chevron-${i}`);
+            if (el) {
+                if (anyHidden) {
+                    el.classList.remove('hidden');
+                    if (ch) ch.style.transform = 'rotate(180deg)';
+                } else {
+                    el.classList.add('hidden');
+                    if (ch) ch.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        const txt = document.getElementById('toggleAllContactsText');
+        if (txt) {
+            txt.textContent = anyHidden 
+                ? '@(language == "en" ? "Collapse all details" : "Itago lahat")' 
+                : '@(language == "en" ? "Expand all details" : "Ipakita lahat")';
+        }
+    }
+</script>
+}
