@@ -1,0 +1,123 @@
+@model List<SupportContact>
+@inject I18nService I18nService
+@{
+    var language = I18nService.CurrentLanguage;
+    var settings = ViewBag.Settings as SystemSettings ?? new SystemSettings();
+    ViewData["Title"] = language == "en" ? "Support Contacts" : "Mga Tanggapang Tutulong";
+
+    var activeContacts = Model
+        .Where(c => c.IsActive && c.PublicationStatus != "Draft")
+        .OrderBy(c => c.DisplayOrder)
+        .ToList();
+}
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 space-y-3">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                @(language == "en" ? "Support contacts" : "Mga tanggapang tutulong")
+            </p>
+            <h1 class="font-serif text-4xl font-semibold text-[#16211A]">
+                @(language == "en"
+                    ? "People who can help, near you."
+                    : "Mga tanggapang makakatulong, malapit sa iyo.")
+            </h1>
+            <p class="text-sm text-[#45544B] leading-relaxed">
+                @(language == "en"
+                    ? $"Offices and hours are verified and published by the {settings.BarangayName} administrator. Available in English and Filipino."
+                    : $"Ang mga tanggapan at oras ng serbisyo ay pinamamahalaan ng tagapangasiwa ng {settings.BarangayName}.")
+            </p>
+            <div class="inline-flex rounded-lg border border-[#DCE2D8] bg-white p-1">
+                <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <button type="submit" name="lang" value="en" class="px-3 py-1 rounded-md text-xs font-semibold cursor-pointer @(language == "en" ? "bg-[#214A35] text-white" : "text-[#45544B]")">
+                        English
+                    </button>
+                </form>
+                <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <button type="submit" name="lang" value="fil" class="px-3 py-1 rounded-md text-xs font-semibold cursor-pointer @(language == "fil" ? "bg-[#214A35] text-white" : "text-[#45544B]")">
+                        Filipino
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-[#FBF1EC] border border-[#E6C8BC] rounded-2xl p-6 space-y-2">
+            <p class="font-serif text-4xl font-semibold text-[#8A3422] tabular-nums">911</p>
+            <p class="text-sm font-semibold text-[#8A3422]">
+                @(language == "en"
+                    ? "In immediate danger? Call 911."
+                    : "Nasa agarang panganib? Tumawag sa 911.")
+            </p>
+            <p class="text-xs text-[#8A3422]">
+                @(language == "en"
+                    ? "SAGIP is a reporting and guidance tool, not an emergency dispatch service."
+                    : "Ang SAGIP ay gabay at pag-uulat lamang, hindi serbisyong pang-emerhensya.")
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @foreach (var sc in activeContacts)
+        {
+            <div class="rounded-2xl p-6 border space-y-4 transition-all duration-300 @(sc.ReceivesSagipReports ? "bg-[#1B3B2B] text-white border-[#1B3B2B] primary-desk-halo relative" : "bg-white text-[#16211A] border-[#DCE2D8] hover:shadow-xs")">
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <p class="text-xs font-semibold uppercase tracking-wider @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#2F6347]")">
+                            @(language == "en" ? sc.CategoryEn : sc.CategoryFil)
+                        </p>
+                        @if (sc.ReceivesSagipReports)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] text-[#C8DEC9] font-mono border border-white/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                @(language == "en" ? "Official intake desk" : "Opisyal na intake desk")
+                            </span>
+                        }
+                    </div>
+                    <h2 class="font-serif text-xl font-semibold">
+                        @(language == "en" ? sc.OfficeNameEn : sc.OfficeNameFil)
+                    </h2>
+                    <p class="text-xs @(sc.ReceivesSagipReports ? "text-[#DCE6DA]" : "text-[#66756B]")">
+                        @(language == "en" ? sc.OfficeNameFil : sc.OfficeNameEn)
+                    </p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(sc.GuidanceEn) || !string.IsNullOrEmpty(sc.GuidanceFil))
+                {
+                    <p class="text-xs leading-relaxed @(sc.ReceivesSagipReports ? "text-[#DCE6DA]" : "text-[#45544B]")">
+                        @(language == "en" ? sc.GuidanceEn : sc.GuidanceFil ?? sc.GuidanceEn)
+                    </p>
+                }
+
+                <div class="pt-4 border-t grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs @(sc.ReceivesSagipReports ? "border-white/15" : "border-[#DCE2D8]")">
+                    <div class="space-y-0.5">
+                        <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                            <i data-lucide="phone-call" class="w-3.5 h-3.5 shrink-0"></i> Phone
+                        </p>
+                        <p class="font-mono font-semibold text-sm tabular-nums break-words">@sc.Phone</p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> Hours
+                        </p>
+                        <p class="font-medium text-sm">
+                            @(language == "en" ? sc.HoursEn : sc.HoursFil)
+                        </p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(sc.AddressEn) || !string.IsNullOrEmpty(sc.AddressFil))
+                    {
+                        <div class="sm:col-span-2 space-y-0.5 pt-1">
+                            <p class="flex items-center gap-1 @(sc.ReceivesSagipReports ? "text-[#C8DEC9]" : "text-[#66756B]")">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0"></i> Address
+                            </p>
+                            <p class="text-xs font-medium">
+                                @(language == "en" ? sc.AddressEn : sc.AddressFil ?? sc.AddressEn)
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

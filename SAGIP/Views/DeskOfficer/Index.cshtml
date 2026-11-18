@@ -1,0 +1,273 @@
+@model DeskOfficerDashboardViewModel
+@{
+    Layout = "_StaffLayout";
+    ViewData["Title"] = "Desk Officer Workspace";
+    var activeTab = Context.Request.Query["tab"].ToString();
+    if (string.IsNullOrEmpty(activeTab)) activeTab = "overview";
+
+    var openCases = Model.Cases.Where(c => c.Status != "Closed").ToList();
+    var awaitingTriage = openCases.Where(c => string.IsNullOrEmpty(c.Urgency)).ToList();
+    var highUrgency = openCases.Where(c => c.Urgency == "High").ToList();
+    var assignedToMe = openCases.Where(c => c.AssignedOfficerId == Model.CurrentUser.UserId).ToList();
+
+    var filter = Context.Request.Query["queue"].ToString();
+    if (string.IsNullOrEmpty(filter)) filter = (activeTab == "mine" ? "mine" : "open");
+
+    var displayCases = Model.Cases.AsEnumerable();
+    if (filter == "mine" || activeTab == "mine")
+    {
+        displayCases = displayCases.Where(c => c.AssignedOfficerId == Model.CurrentUser.UserId && c.Status != "Closed");
+    }
+    else if (filter == "unassigned")
+    {
+        displayCases = displayCases.Where(c => string.IsNullOrEmpty(c.AssignedOfficerId) && c.Status != "Closed");
+    }
+    else if (filter == "untriaged")
+    {
+        displayCases = displayCases.Where(c => string.IsNullOrEmpty(c.Urgency) && c.Status != "Closed");
+    }
+    else if (filter == "high")
+    {
+        displayCases = displayCases.Where(c => c.Urgency == "High" && c.Status != "Closed");
+    }
+    else if (filter == "closed")
+    {
+        displayCases = displayCases.Where(c => c.Status == "Closed");
+    }
+    else if (filter == "open" || activeTab == "overview")
+    {
+        displayCases = displayCases.Where(c => c.Status != "Closed");
+    }
+}
+
+@if (activeTab == "stats")
+{
+    @await Html.PartialAsync("_AnonymizedStats")
+}
+else if (activeTab == "contacts")
+{
+    <div class="space-y-6">
+        <div class="border-b border-[#DCE2D8] pb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                Directory for referrals &amp; escalation
+            </p>
+            <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                Support contacts
+            </h1>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach (var c in Model.SupportContacts)
+            {
+                <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <h3 class="font-semibold text-sm text-[#16211A]">@c.Name</h3>
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded bg-[#EAF0E8] text-[#1B3B2B]">@c.Category</span>
+                    </div>
+                    <p class="text-xs text-[#45544B]">@c.Address</p>
+                    <div class="pt-2 text-xs font-mono space-y-0.5">
+                        <p class="text-[#214A35] font-semibold">@c.Phone</p>
+                        @if (!string.IsNullOrEmpty(c.Email))
+                        {
+                            <p class="text-[#66756B]">@c.Email</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="space-y-8">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#DCE2D8] pb-5">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                    @(activeTab == "mine" ? "Assigned to you" : "Overview · Case management")
+                </p>
+                <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                    Every report deserves care.
+                </h1>
+                <p class="text-sm text-[#45544B] mt-1">
+                    Review new reports, set urgency manually, and record assessments, referrals, and BPOs.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a asp-controller="Report" asp-action="Index" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                    <span>Log Walk-in / Intake</span>
+                </a>
+                <span class="text-xs text-[#66756B]">VAWC desk · Authorized access</span>
+            </div>
+        </div>
+
+        <!-- Alerts Banner -->
+        @if (Model.Alerts.Count > 0)
+        {
+            <div class="bg-[#FBF1EC] border border-[#E6C8BC] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-start gap-2.5 text-xs text-[#8A3422]">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold">
+                            @Model.Alerts.Count @(Model.Alerts.Count == 1 ? "case needs" : "cases need") attention
+                        </p>
+                        <p class="mt-0.5">
+                            @string.Join(" · ", Model.Alerts.Take(2).Select(a => $"{a.CaseNumber}: {a.Reason}"))
+                        </p>
+                    </div>
+                </div>
+                <a asp-action="Details" asp-route-id="@Model.Alerts[0].CaseId" class="text-xs font-semibold text-[#8A3422] underline underline-offset-2 shrink-0 cursor-pointer">
+                    Review first alert →
+                </a>
+            </div>
+        }
+
+        <!-- KPI Strip -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-1">
+                <p class="text-xs font-medium text-[#66756B]">Open cases</p>
+                <p class="font-serif text-3xl font-semibold text-[#16211A] tabular-nums">@openCases.Count.ToString("D2")</p>
+                <p class="text-[11px] text-[#66756B]">Across the barangay desk</p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-1">
+                <p class="text-xs font-medium text-[#66756B]">Awaiting triage</p>
+                <p class="font-serif text-3xl font-semibold text-[#16211A] tabular-nums">@awaitingTriage.Count.ToString("D2")</p>
+                <p class="text-[11px] text-[#66756B]">Urgency not yet set</p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-1">
+                <p class="text-xs font-medium text-[#66756B]">High urgency</p>
+                <p class="font-serif text-3xl font-semibold text-[#16211A] tabular-nums">@highUrgency.Count.ToString("D2")</p>
+                <p class="text-[11px] text-[#66756B]">Set by a desk officer</p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-1">
+                <p class="text-xs font-medium text-[#66756B]">Assigned to me</p>
+                <p class="font-serif text-3xl font-semibold text-[#16211A] tabular-nums">@assignedToMe.Count.ToString("D2")</p>
+                <p class="text-[11px] text-[#66756B]">Your open cases</p>
+            </div>
+        </div>
+
+        <!-- Case Queue Table + Human Decision Callout -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+            <div class="xl:col-span-9 bg-white border border-[#DCE2D8] rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-[#DCE2D8] flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-1 p-1 bg-[#F6F4EC] rounded-lg border border-[#DCE2D8]">
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = activeTab, queue = "open" })" class="px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer @(filter == "open" ? "bg-white text-[#1B3B2B] font-semibold" : "text-[#45544B]")">
+                            All open (@openCases.Count)
+                        </a>
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = activeTab, queue = "unassigned" })" class="px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer @(filter == "unassigned" ? "bg-white text-[#1B3B2B] font-semibold" : "text-[#45544B]")">
+                            Unassigned (@openCases.Count(c => string.IsNullOrEmpty(c.AssignedOfficerId)))
+                        </a>
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = activeTab, queue = "untriaged" })" class="px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer @(filter == "untriaged" ? "bg-white text-[#1B3B2B] font-semibold" : "text-[#45544B]")">
+                            Awaiting triage (@awaitingTriage.Count)
+                        </a>
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = activeTab, queue = "high" })" class="px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer @(filter == "high" ? "bg-white text-[#1B3B2B] font-semibold" : "text-[#45544B]")">
+                            High (@highUrgency.Count)
+                        </a>
+                        <a href="@Url.Action("Index", "DeskOfficer", new { tab = activeTab, queue = "closed" })" class="px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer @(filter == "closed" ? "bg-white text-[#1B3B2B] font-semibold" : "text-[#45544B]")">
+                            Closed
+                        </a>
+                    </div>
+
+                    <input type="search" id="caseSearch" onkeyup="filterCasesTable()" placeholder="Filter case ID..." class="px-3 py-1.5 rounded-lg border border-[#DCE2D8] text-xs w-full sm:w-44 focus:outline-none" />
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs" id="casesTable">
+                        <thead class="bg-[#F6F4EC] border-b border-[#DCE2D8] text-[#66756B] uppercase tracking-wider text-[11px]">
+                            <tr>
+                                <th class="py-3 px-4 font-semibold">Case / Type</th>
+                                <th class="py-3 px-4 font-semibold">Urgency</th>
+                                <th class="py-3 px-4 font-semibold">Status</th>
+                                <th class="py-3 px-4 font-semibold">Officer</th>
+                                <th class="py-3 px-4 font-semibold text-right">Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#DCE2D8]">
+                            @if (!displayCases.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-[#66756B]">
+                                        No cases match this filter.
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var c in displayCases)
+                                {
+                                    var rep = Model.Reports.FirstOrDefault(r => r.ReportId == c.ReportId);
+                                    var officer = Model.StaffUsers.FirstOrDefault(u => u.UserId == c.AssignedOfficerId);
+                                    <tr onclick="location.href='@Url.Action("Details", "DeskOfficer", new { id = c.CaseId })'" class="hover:bg-[#EAF0E8]/50 cursor-pointer transition-colors case-row" data-case="@c.CaseNumber">
+                                        <td class="py-3 px-4">
+                                            <span class="font-mono font-semibold text-[#1B3B2B] block tabular-nums">
+                                                @c.CaseNumber
+                                            </span>
+                                            <span class="text-[#66756B]">
+                                                @(rep != null && rep.IsThirdParty ? "Third-party · " : "")
+                                                @(rep != null ? rep.ReportType : "Report")
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 font-medium">
+                                            @if (c.Urgency == "High")
+                                            {
+                                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FBF1EC] text-[#8A3422] font-semibold text-[11px] border border-[#E6C8BC]">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#8A3422] animate-pulse"></span>
+                                                    <span>High</span>
+                                                </span>
+                                            }
+                                            else if (!string.IsNullOrEmpty(c.Urgency))
+                                            {
+                                                <span class="text-[#45544B] text-xs">@c.Urgency</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-[#9A3F2B] text-xs font-medium">Not set</span>
+                                            }
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-2 py-0.5 rounded text-[11px] font-medium @(c.Status == "Closed" ? "bg-gray-100 text-gray-700" : c.Status == "BPO Issued" ? "bg-emerald-100 text-emerald-900" : "bg-[#EAF0E8] text-[#1B3B2B]")">
+                                                @c.Status
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 text-[#45544B]">
+                                            @(officer != null ? officer.FullName : "Unassigned")
+                                        </td>
+                                        <td class="py-3 px-4 text-right text-[#66756B] font-mono whitespace-nowrap">
+                                            @{
+                                                var hrsAgo = Math.Round((DateTime.UtcNow - c.LastActivityAt).TotalHours, 0);
+                                                var timeAgo = hrsAgo < 1 ? "Just now" : hrsAgo < 24 ? $"{hrsAgo}h ago" : $"{Math.Round(hrsAgo / 24, 0)}d ago";
+                                            }
+                                            @timeAgo
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Human Decision Callout Card -->
+            <div class="xl:col-span-3 bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+                <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>Human judgment</span>
+                </div>
+                <h3 class="font-serif text-lg font-semibold text-[#16211A]">No automated triage</h3>
+                <p class="text-xs text-[#45544B] leading-relaxed">
+                    Under RA 9262 and SAGIP safety design rules, automated algorithms never rank, delay, or reject survivor reports. Urgency, abuse classifications, and protection orders are decided solely by trained desk officers.
+                </p>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    function filterCasesTable() {
+        const val = document.getElementById('caseSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('.case-row');
+        rows.forEach(r => {
+            const caseNum = r.getAttribute('data-case').toLowerCase();
+            r.style.display = caseNum.includes(val) ? '' : 'none';
+        });
+    }
+</script>

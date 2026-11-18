@@ -1,0 +1,227 @@
+@inject ISagipService SagipService
+@{
+    var stats = SagipService.GetAnonymizedStats();
+
+    // Small cell suppression algorithm matching AnonymizedStatsPanel.tsx
+    // Hide counts under 3 AND apply complementary suppression so hidden counts cannot be deduced
+    (string label, string display, bool suppressed)[] SuppressSmallCells((string label, int count)[] rows)
+    {
+        var underThree = rows.Where(r => r.count > 0 && r.count < 3).ToList();
+        var nonZero = rows.Where(r => r.count > 0).ToList();
+
+        string? complementaryLabel = null;
+        if (underThree.Count == 1 && nonZero.Count > 1)
+        {
+            var candidates = nonZero.Where(r => r.count >= 3).OrderBy(r => r.count).ToList();
+            if (candidates.Count > 0)
+            {
+                complementaryLabel = candidates[0].label;
+            }
+        }
+
+        return rows.Select(r =>
+        {
+            if (r.count > 0 && r.count < 3)
+            {
+                return (r.label, "< 3 (hidden)", true);
+            }
+            if (complementaryLabel != null && r.label == complementaryLabel)
+            {
+                return (r.label, "Suppressed", true);
+            }
+            return (r.label, r.count.ToString(), false);
+        }).ToArray();
+    }
+
+    var reportTypeRows = SuppressSmallCells(new[]
+    {
+        ("Anonymous", stats.AnonymousCount),
+        ("Identified", stats.IdentifiedCount)
+    });
+
+    var victimTypeRows = SuppressSmallCells(new[]
+    {
+        ("Woman", stats.CasesByVictimType.GetValueOrDefault("Woman", 0)),
+        ("Child", stats.CasesByVictimType.GetValueOrDefault("Child", 0)),
+        ("Other", stats.CasesByVictimType.GetValueOrDefault("Other", 0))
+    });
+
+    var statusRows = SuppressSmallCells(new[]
+    {
+        ("Received", stats.CasesByStatus.GetValueOrDefault("Received", 0)),
+        ("Under Assessment", stats.CasesByStatus.GetValueOrDefault("Under Assessment", 0)),
+        ("Referred", stats.CasesByStatus.GetValueOrDefault("Referred", 0)),
+        ("BPO Issued", stats.CasesByStatus.GetValueOrDefault("BPO Issued", 0)),
+        ("Closed", stats.CasesByStatus.GetValueOrDefault("Closed", 0))
+    });
+
+    var urgencyRows = SuppressSmallCells(new[]
+    {
+        ("High", stats.CasesByUrgency.GetValueOrDefault("High", 0)),
+        ("Medium", stats.CasesByUrgency.GetValueOrDefault("Medium", 0)),
+        ("Low", stats.CasesByUrgency.GetValueOrDefault("Low", 0)),
+        ("Not yet set", stats.CasesByUrgency.GetValueOrDefault("Unassessed", 0))
+    });
+
+    var abuseRows = SuppressSmallCells(new[]
+    {
+        ("Physical", stats.CasesByAbuseType.GetValueOrDefault("Physical", 0)),
+        ("Sexual", stats.CasesByAbuseType.GetValueOrDefault("Sexual", 0)),
+        ("Psychological", stats.CasesByAbuseType.GetValueOrDefault("Psychological", 0)),
+        ("Economic", stats.CasesByAbuseType.GetValueOrDefault("Economic", 0))
+    });
+
+    var allRows = reportTypeRows.Concat(victimTypeRows).Concat(statusRows).Concat(urgencyRows).Concat(abuseRows).ToList();
+    var anySuppressed = (stats.TotalCases > 0 && stats.TotalCases < 3) || allRows.Any(r => r.suppressed);
+}
+
+<div class="space-y-6">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#DCE2D8] pb-4">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                Privacy-preserving aggregate counts
+            </p>
+            <h2 class="font-serif text-2xl font-semibold text-[#16211A] mt-0.5">
+                Anonymized statistics
+            </h2>
+            <p class="text-xs text-[#66756B] mt-1">
+                No personal data is included. Counts under 3 are hidden, and complementary suppression prevents deriving hidden values by subtraction.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1 p-1 bg-[#F6F4EC] rounded-lg border border-[#DCE2D8] overflow-x-auto max-w-full">
+                <button type="button" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-[#1B3B2B] shrink-0">
+                    All periods
+                </button>
+                <button type="button" class="px-3 py-1.5 rounded-md text-xs font-medium text-[#45544B] hover:text-[#16211A] shrink-0">
+                    Nov 2026
+                </button>
+                <button type="button" class="px-3 py-1.5 rounded-md text-xs font-medium text-[#45544B] hover:text-[#16211A] shrink-0">
+                    Oct 2026
+                </button>
+            </div>
+
+            <button type="button"
+                    disabled="@(anySuppressed)"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold shrink-0 @(anySuppressed ? "bg-[#DCE2D8] text-[#66756B] cursor-not-allowed" : "bg-[#214A35] hover:bg-[#183828] text-white cursor-pointer")">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>@(anySuppressed ? "Export unavailable (suppressed)" : "Export CSV")</span>
+            </button>
+        </div>
+    </div>
+
+    @if (anySuppressed)
+    {
+        <!-- Terracotta Hidden-for-Privacy Banner -->
+        <div class="bg-[#FBF1EC] border border-[#E6C8BC] rounded-xl p-4 flex items-start gap-2.5 text-xs text-[#8A3422]">
+            <i data-lucide="shield-alert" class="w-4 h-4 shrink-0 mt-0.5"></i>
+            <div class="space-y-0.5">
+                <p class="font-semibold">Hidden for privacy</p>
+                <p class="leading-relaxed">
+                    One or more cells in this view contain fewer than 3 cases (or require complementary suppression). Hidden cells and period totals are suppressed so individuals cannot be re-identified.
+                </p>
+            </div>
+        </div>
+    }
+
+    <div class="bg-[#EAF0E8] border border-[#C9D6C5] rounded-xl px-5 py-3.5 flex items-center justify-between text-sm">
+        <span class="font-medium text-[#1B3B2B]">Total reports in period</span>
+        <span class="font-mono font-semibold text-[#1B3B2B] tabular-nums">
+            @(stats.TotalCases > 0 && stats.TotalCases < 3 ? "< 3 (hidden)" : anySuppressed ? "Suppressed to protect small cells" : stats.TotalCases.ToString())
+        </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- By report type -->
+        <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-semibold text-[#16211A]">By report type</h3>
+            <div class="divide-y divide-[#DCE2D8]">
+                @foreach (var row in reportTypeRows)
+                {
+                    <div class="py-2 flex items-center justify-between text-sm">
+                        <span class="text-[#45544B]">@row.label</span>
+                        <span class="font-mono tabular-nums @(row.suppressed ? "text-xs text-[#8A3422] italic" : "font-semibold text-[#214A35]")">
+                            @row.display
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- By victim type -->
+        <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-semibold text-[#16211A]">By victim type</h3>
+            <div class="divide-y divide-[#DCE2D8]">
+                @foreach (var row in victimTypeRows)
+                {
+                    <div class="py-2 flex items-center justify-between text-sm">
+                        <span class="text-[#45544B]">@row.label</span>
+                        <span class="font-mono tabular-nums @(row.suppressed ? "text-xs text-[#8A3422] italic" : "font-semibold text-[#214A35]")">
+                            @row.display
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- By status -->
+        <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-semibold text-[#16211A]">By status</h3>
+            <div class="divide-y divide-[#DCE2D8]">
+                @foreach (var row in statusRows)
+                {
+                    <div class="py-2 flex items-center justify-between text-sm">
+                        <span class="text-[#45544B]">@row.label</span>
+                        <span class="font-mono tabular-nums @(row.suppressed ? "text-xs text-[#8A3422] italic" : "font-semibold text-[#214A35]")">
+                            @row.display
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- By officer-set urgency -->
+        <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-semibold text-[#16211A]">By officer-set urgency</h3>
+            <div class="divide-y divide-[#DCE2D8]">
+                @foreach (var row in urgencyRows)
+                {
+                    <div class="py-2 flex items-center justify-between text-sm">
+                        <span class="text-[#45544B]">@row.label</span>
+                        <span class="font-mono tabular-nums @(row.suppressed ? "text-xs text-[#8A3422] italic" : "font-semibold text-[#214A35]")">
+                            @row.display
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- By abuse type (multi-label) -->
+        <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-3">
+            <h3 class="text-sm font-semibold text-[#16211A]">By abuse type (multi-label)</h3>
+            <div class="divide-y divide-[#DCE2D8]">
+                @foreach (var row in abuseRows)
+                {
+                    <div class="py-2 flex items-center justify-between text-sm">
+                        <span class="text-[#45544B]">@row.label</span>
+                        <span class="font-mono tabular-nums @(row.suppressed ? "text-xs text-[#8A3422] italic" : "font-semibold text-[#214A35]")">
+                            @row.display
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- No Indirect Disclosure Card -->
+    <div class="bg-white border border-[#DCE2D8] rounded-xl p-4 flex items-start gap-3 text-xs text-[#45544B]">
+        <i data-lucide="lock" class="w-4 h-4 text-[#214A35] shrink-0 mt-0.5"></i>
+        <div>
+            <p class="font-semibold text-[#16211A]">No indirect disclosure</p>
+            <p class="mt-0.5">
+                Hidden cells have no charts, hover tooltips, CSV export values, or drill-through links to individual cases.
+            </p>
+        </div>
+    </div>
+</div>

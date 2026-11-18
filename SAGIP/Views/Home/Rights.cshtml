@@ -1,0 +1,139 @@
+@inject I18nService I18nService
+@{
+    ViewData["Title"] = "Your Rights";
+}
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12">
+    <!-- Header -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end border-b border-[#DCE2D8] pb-8">
+        <div class="lg:col-span-8 space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                Know your rights
+            </p>
+            <h1 class="font-serif text-4xl font-semibold text-[#16211A]">
+                Knowledge can be a first step.
+            </h1>
+            <p class="text-base text-[#45544B] leading-relaxed max-w-2xl">
+                Plain-language guides on recognizing abuse, Republic Act 9262, and Barangay Protection Orders. Read at your own pace.
+            </p>
+        </div>
+
+        <div class="lg:col-span-4 bg-[#FBF1EC] border border-[#E6C8BC] rounded-xl p-4 text-xs text-[#8A3422] space-y-1">
+            <p class="font-semibold">This is general information, not legal advice.</p>
+            <p>In immediate danger? Call 911. SAGIP is not an emergency service.</p>
+        </div>
+    </div>
+
+    <!-- Section 01: Recognizing Abuse -->
+    <section class="space-y-5">
+        <div>
+            <p class="text-xs font-mono text-[#2F6347]">01 · Know your options</p>
+            <h2 class="font-serif text-2xl font-semibold text-[#16211A] mt-1">
+                Recognizing abuse
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-2">
+                <h3 class="text-base font-semibold text-[#1B3B2B]">Physical</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Hitting, slapping, choking, pushing, or any act that causes bodily harm or fear of harm.
+                </p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-2">
+                <h3 class="text-base font-semibold text-[#1B3B2B]">Sexual</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Any sexual act or attempt without consent, including forced acts or sexual intimidation.
+                </p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-2">
+                <h3 class="text-base font-semibold text-[#1B3B2B]">Psychological</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Threats, humiliation, stalking, isolation, or controlling behavior that causes emotional suffering.
+                </p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-2">
+                <h3 class="text-base font-semibold text-[#1B3B2B]">Economic</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Controlling household money, withholding financial support, or stopping you from working.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 02: RA 9262 & How SAGIP handles reports -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-white border border-[#DCE2D8] rounded-2xl p-6 sm:p-8 space-y-3">
+            <p class="text-xs font-mono text-[#2F6347]">02 · Know your options</p>
+            <h2 class="font-serif text-2xl font-semibold text-[#16211A]">
+                RA 9262, in plain language
+            </h2>
+            <p class="text-sm text-[#45544B] leading-relaxed">
+                The <strong>Anti-Violence Against Women and Their Children Act (RA 9262)</strong> protects women and their children from physical, sexual, psychological, or economic abuse committed by a current or former husband or partner, or by someone with whom they have or had a dating or sexual relationship.
+            </p>
+        </div>
+
+        <div class="lg:col-span-5 bg-[#EAF0E8] border border-[#C9D6C5] rounded-2xl p-6 sm:p-8 space-y-3">
+            <h3 class="text-base font-semibold text-[#1B3B2B]">How SAGIP handles reports</h3>
+            <ul class="space-y-2 text-sm text-[#45544B] list-disc pl-5">
+                <li>Women and their children follow RA 9262 handling at the barangay VAWC desk.</li>
+                <li>
+                    For other victims, the desk still records the report and you are guided to the appropriate agency.
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Section 03: Barangay Protection Orders -->
+    <section class="space-y-5">
+        <div>
+            <p class="text-xs font-mono text-[#2F6347]">03 · Know your options</p>
+            <h2 class="font-serif text-2xl font-semibold text-[#16211A] mt-1">
+                Protection orders, explained
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-6 space-y-2">
+                <span class="text-xs font-mono text-[#2F6347]">01</span>
+                <h3 class="text-base font-semibold text-[#16211A]">What a BPO is</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    A Barangay Protection Order is issued by the Punong Barangay—or the Barangay Kagawad acting in their absence—to order an abuser to stop further acts of violence.
+                </p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-6 space-y-2">
+                <span class="text-xs font-mono text-[#2F6347]">02</span>
+                <h3 class="text-base font-semibold text-[#16211A]">Where to ask</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Ask your barangay VAWC desk. Note that anonymous reports have no direct follow-up, so they cannot lead to a protection order.
+                </p>
+            </div>
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-6 space-y-2">
+                <span class="text-xs font-mono text-[#2F6347]">03</span>
+                <h3 class="text-base font-semibold text-[#16211A]">After it is issued</h3>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    The desk officer records BPO Issued on the case and you can see the updated status using your reference code.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <div class="bg-[#1B3B2B] text-white rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="space-y-1">
+            <h2 class="font-serif text-2xl font-semibold">Ready to reach out?</h2>
+            <p class="text-sm text-[#DCE6DA]">
+                You decide what to share. No account needed. This is general information, not legal advice.
+            </p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto">
+            <a asp-controller="Status" asp-action="Index" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-white/25 text-white text-sm font-semibold hover:bg-white/10 transition-colors cursor-pointer text-center">
+                Check status
+            </a>
+            <a asp-controller="Report" asp-action="Index" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-white text-[#1B3B2B] text-sm font-semibold hover:bg-[#EAF0E8] transition-colors cursor-pointer text-center">
+                <span>Start a report</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 shrink-0"></i>
+            </a>
+        </div>
+    </div>
+</div>

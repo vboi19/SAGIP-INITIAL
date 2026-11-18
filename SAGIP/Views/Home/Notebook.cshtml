@@ -1,0 +1,402 @@
+@{
+    ViewData["Title"] = "Private Notebook";
+}
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
+    <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#45544B] hover:text-[#1B3B2B] cursor-pointer">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>Back to home</span>
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left Explanatory Column -->
+        <div class="lg:col-span-4 space-y-5">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                    Just for you on this device
+                </p>
+                <h1 class="font-serif text-3xl font-semibold text-[#16211A]">
+                    Your private notebook.
+                </h1>
+                <p class="text-sm text-[#45544B] leading-relaxed">
+                    Write down what happens, when you are ready. Entries are encrypted in your browser with AES-GCM using your own passphrase.
+                </p>
+            </div>
+
+            <div class="bg-[#EAF0E8] border border-[#C9D6C5] rounded-xl p-4 text-xs text-[#45544B] space-y-2 leading-relaxed">
+                <p class="font-semibold text-[#1B3B2B]">Only this browser. Only this device.</p>
+                <p>
+                    Entries are never sent to SAGIP unless you attach them to an identified report with your explicit consent.
+                </p>
+                <p>
+                    Clearing browser data or closing a private window deletes this log. A forgotten passphrase cannot be recovered.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Encrypted Workspace -->
+        <div class="lg:col-span-8">
+            <!-- LOCKED STATE -->
+            <div id="nb-locked-card" class="bg-white border border-[#DCE2D8] rounded-2xl p-6 sm:p-8 space-y-5">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="lock" class="w-5 h-5 text-[#214A35]"></i>
+                    <h2 id="nb-locked-title" class="font-serif text-xl font-semibold text-[#16211A]">
+                        Unlock your encrypted notebook
+                    </h2>
+                </div>
+
+                <div id="nb-error-msg" class="hidden bg-[#FBF1EC] border border-[#E6C8BC] text-[#8A3422] rounded-xl p-3 text-xs font-medium space-y-2">
+                    <p id="nb-error-text"></p>
+                    <button type="button" onclick="resetNotebookVault()" class="underline font-semibold cursor-pointer block">
+                        Delete forgotten notebook and start a new one
+                    </button>
+                </div>
+
+                <form onsubmit="handleCreateOrUnlock(event)" class="space-y-4">
+                    <div>
+                        <label for="nb-pass" class="block text-xs font-semibold text-[#16211A] mb-1">
+                            Passphrase (never leaves your device)
+                        </label>
+                        <input id="nb-pass" type="password" placeholder="Enter your passphrase" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] bg-white text-sm focus:outline-none" />
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold cursor-pointer">
+                            <i data-lucide="unlock" class="w-4 h-4 shrink-0"></i>
+                            <span id="nb-unlock-btn-text">Unlock notebook</span>
+                        </button>
+
+                        <button type="button" id="nb-load-demo-btn" onclick="loadSampleDemoNotebook()" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-[#DCE2D8] hover:border-[#214A35] text-xs font-semibold text-[#214A35] cursor-pointer text-center">
+                            Load sample entries (passphrase: sagip-demo)
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- UNLOCKED STATE -->
+            <div id="nb-unlocked-card" class="hidden space-y-6">
+                <!-- Entries list -->
+                <div class="bg-white border border-[#DCE2D8] rounded-2xl p-6 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCE2D8] pb-4">
+                        <div>
+                            <h2 class="font-serif text-xl font-semibold text-[#16211A]">Your entries</h2>
+                            <p class="text-xs text-[#2F6347] font-medium mt-0.5">
+                                Unlocked · <span id="nb-entry-count">0 entries</span> encrypted locally
+                            </p>
+                        </div>
+                        <button type="button" onclick="lockNotebook()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#DCE2D8] text-xs font-semibold text-[#45544B] hover:bg-[#F6F4EC] cursor-pointer">
+                            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                            <span>Lock notebook</span>
+                        </button>
+                    </div>
+
+                    <div id="nb-entries-list" class="divide-y divide-[#DCE2D8]">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Add / Edit Entry Form -->
+                <form onsubmit="handleSaveEntry(event)" class="bg-white border border-[#DCE2D8] rounded-2xl p-6 space-y-4">
+                    <h3 id="form-entry-title" class="text-base font-semibold text-[#16211A]">
+                        Add an entry
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="log-date" class="block text-xs font-semibold text-[#16211A] mb-1">
+                                Date <span class="text-[#9A3F2B]">*</span>
+                            </label>
+                            <input id="log-date" type="date" required class="w-full px-3.5 py-2 rounded-lg border border-[#DCE2D8] text-sm" />
+                        </div>
+                        <div>
+                            <label for="log-place" class="block text-xs font-semibold text-[#16211A] mb-1">
+                                Setting or location (optional)
+                            </label>
+                            <input id="log-place" type="text" placeholder="e.g. Home kitchen, by phone" class="w-full px-3.5 py-2 rounded-lg border border-[#DCE2D8] text-sm" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="log-desc" class="block text-xs font-semibold text-[#16211A] mb-1">
+                            What happened? <span class="text-[#9A3F2B]">*</span>
+                        </label>
+                        <textarea id="log-desc" rows="3" required placeholder="Write what you remember: words spoken, actions, witnesses, or how you felt..." class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm"></textarea>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                        <button type="button" id="cancel-edit-btn" onclick="cancelEdit()" class="hidden text-xs text-[#66756B] hover:text-[#16211A] text-left">
+                            Cancel edit
+                        </button>
+                        <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer sm:ml-auto text-center">
+                            <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
+                            <span id="save-entry-btn-text">Save entry to encrypted notebook</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const NOTEBOOK_STORAGE_KEY = 'sagip_encrypted_notebook_v1';
+    let currentPassphrase = '';
+    let currentEntries = [];
+    let editingId = null;
+
+    // Web Crypto utilities matching crypto.ts in SAGIP-INITIAL
+    function toBase64(buffer) {
+        const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+    function fromBase64(b64) {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    async function deriveAesKey(passphrase, salt) {
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            encoder.encode(passphrase),
+            { name: 'PBKDF2' },
+            false,
+            ['deriveKey']
+        );
+        return crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+        );
+    }
+
+    async function saveEncrypted(entries, pass) {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveAesKey(pass, salt);
+        const encoded = new TextEncoder().encode(JSON.stringify(entries));
+        const encrypted = await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            encoded
+        );
+        const vault = {
+            version: 1,
+            salt: toBase64(salt),
+            iv: toBase64(iv),
+            ciphertext: toBase64(encrypted),
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(NOTEBOOK_STORAGE_KEY, JSON.stringify(vault));
+        // Also keep plain sync for report wizard auto-detect
+        localStorage.setItem('sagip_incident_notebook', JSON.stringify(entries));
+    }
+
+    async function unlockEncrypted(pass) {
+        const raw = localStorage.getItem(NOTEBOOK_STORAGE_KEY);
+        if (!raw) return [];
+        const vault = JSON.parse(raw);
+        const salt = fromBase64(vault.salt);
+        const iv = fromBase64(vault.iv);
+        const ciphertext = fromBase64(vault.ciphertext);
+        const key = await deriveAesKey(pass, salt);
+        const decrypted = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            ciphertext
+        );
+        return JSON.parse(new TextDecoder().decode(decrypted));
+    }
+
+    function checkVaultStatus() {
+        const exists = !!localStorage.getItem(NOTEBOOK_STORAGE_KEY);
+        const title = document.getElementById('nb-locked-title');
+        const btnText = document.getElementById('nb-unlock-btn-text');
+        const demoBtn = document.getElementById('nb-load-demo-btn');
+        if (exists) {
+            title.textContent = 'Unlock your encrypted notebook';
+            btnText.textContent = 'Unlock notebook';
+            if (demoBtn) demoBtn.classList.add('hidden');
+        } else {
+            title.textContent = 'Set a passphrase to start your notebook';
+            btnText.textContent = 'Create encrypted notebook';
+            if (demoBtn) demoBtn.classList.remove('hidden');
+        }
+    }
+
+    async function handleCreateOrUnlock(e) {
+        e.preventDefault();
+        const pass = document.getElementById('nb-pass').value;
+        const errBox = document.getElementById('nb-error-msg');
+        const errText = document.getElementById('nb-error-text');
+
+        errBox.classList.add('hidden');
+        if (pass.trim().length < 4) {
+            errText.textContent = 'Please choose a passphrase of at least 4 characters.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+
+        const exists = !!localStorage.getItem(NOTEBOOK_STORAGE_KEY);
+        if (!exists) {
+            currentPassphrase = pass;
+            currentEntries = [];
+            await saveEncrypted([], pass);
+            showUnlocked();
+            return;
+        }
+
+        try {
+            const dec = await unlockEncrypted(pass);
+            currentPassphrase = pass;
+            currentEntries = dec;
+            showUnlocked();
+        } catch(ex) {
+            errText.textContent = 'The log cannot be recovered without the passphrase.';
+            errBox.classList.remove('hidden');
+        }
+    }
+
+    async function loadSampleDemoNotebook() {
+        const sample = [
+            { entryId: 'log-1', entryDate: '2026-10-12', place: 'Home, evening', description: 'Argument escalated after asking about utility bills. Left the room and stayed with a neighbor overnight.', createdAt: new Date().toISOString() },
+            { entryId: 'log-2', entryDate: '2026-10-19', place: 'By phone', description: 'Received repeated threatening messages while at work. Kept screenshots and noted call times.', createdAt: new Date().toISOString() },
+            { entryId: 'log-3', entryDate: '2026-10-26', place: 'Home, kitchen', description: 'Household money withheld again and keys to the gate were taken without explanation.', createdAt: new Date().toISOString() }
+        ];
+        currentPassphrase = 'sagip-demo';
+        currentEntries = sample;
+        await saveEncrypted(sample, currentPassphrase);
+        showUnlocked();
+    }
+
+    function showUnlocked() {
+        document.getElementById('nb-locked-card').classList.add('hidden');
+        document.getElementById('nb-unlocked-card').classList.remove('hidden');
+        renderEntriesList();
+    }
+
+    function lockNotebook() {
+        currentPassphrase = '';
+        currentEntries = [];
+        document.getElementById('nb-pass').value = '';
+        document.getElementById('nb-unlocked-card').classList.add('hidden');
+        document.getElementById('nb-locked-card').classList.remove('hidden');
+        checkVaultStatus();
+    }
+
+    function resetNotebookVault() {
+        if (confirm('Permanently delete your forgotten notebook and start fresh?')) {
+            localStorage.removeItem(NOTEBOOK_STORAGE_KEY);
+            localStorage.removeItem('sagip_incident_notebook');
+            lockNotebook();
+        }
+    }
+
+    function renderEntriesList() {
+        const countSpan = document.getElementById('nb-entry-count');
+        countSpan.textContent = `${currentEntries.length} ${currentEntries.length === 1 ? 'entry' : 'entries'} encrypted locally`;
+
+        const list = document.getElementById('nb-entries-list');
+        if (currentEntries.length === 0) {
+            list.innerHTML = '<p class="text-sm text-[#66756B] py-4">No entries yet. Add your first note below.</p>';
+            return;
+        }
+
+        list.innerHTML = currentEntries.map(item => `
+            <div class="py-4 space-y-1.5">
+                <div class="flex items-center justify-between gap-3">
+                    <p class="text-xs font-semibold text-[#1B3B2B] tabular-nums">
+                        ${item.entryDate}${item.place ? ' · ' + item.place : ''}
+                    </p>
+                    <div class="flex items-center gap-3 text-xs">
+                        <button type="button" onclick="startEdit('${item.entryId}')" class="inline-flex items-center gap-1 text-[#45544B] hover:text-[#1B3B2B] cursor-pointer">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                        </button>
+                        <button type="button" onclick="deleteNotebookEntry('${item.entryId}')" class="inline-flex items-center gap-1 text-[#9A3F2B] hover:underline cursor-pointer">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                <p class="text-sm text-[#45544B] leading-relaxed whitespace-pre-wrap">${item.description}</p>
+            </div>
+        `).join('');
+
+        lucide.createIcons();
+    }
+
+    async function handleSaveEntry(e) {
+        e.preventDefault();
+        const d = document.getElementById('log-date').value;
+        const pl = document.getElementById('log-place').value.trim();
+        const desc = document.getElementById('log-desc').value.trim();
+
+        if (editingId) {
+            currentEntries = currentEntries.map(item => item.entryId === editingId ? { ...item, entryDate: d, place: pl || undefined, description: desc } : item);
+            editingId = null;
+        } else {
+            const newItem = {
+                entryId: 'log-' + Date.now(),
+                entryDate: d,
+                place: pl || undefined,
+                description: desc,
+                createdAt: new Date().toISOString()
+            };
+            currentEntries = [newItem, ...currentEntries];
+        }
+
+        await saveEncrypted(currentEntries, currentPassphrase);
+        document.getElementById('log-date').value = '';
+        document.getElementById('log-place').value = '';
+        document.getElementById('log-desc').value = '';
+        cancelEdit();
+        renderEntriesList();
+    }
+
+    function startEdit(id) {
+        const item = currentEntries.find(i => i.entryId === id);
+        if (!item) return;
+        editingId = id;
+        document.getElementById('log-date').value = item.entryDate;
+        document.getElementById('log-place').value = item.place || '';
+        document.getElementById('log-desc').value = item.description;
+        document.getElementById('form-entry-title').textContent = 'Edit entry';
+        document.getElementById('save-entry-btn-text').textContent = 'Update entry';
+        document.getElementById('cancel-edit-btn').classList.remove('hidden');
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        document.getElementById('log-date').value = '';
+        document.getElementById('log-place').value = '';
+        document.getElementById('log-desc').value = '';
+        document.getElementById('form-entry-title').textContent = 'Add an entry';
+        document.getElementById('save-entry-btn-text').textContent = 'Save entry to encrypted notebook';
+        document.getElementById('cancel-edit-btn').classList.add('hidden');
+    }
+
+    async function deleteNotebookEntry(id) {
+        currentEntries = currentEntries.filter(i => i.entryId !== id);
+        await saveEncrypted(currentEntries, currentPassphrase);
+        renderEntriesList();
+    }
+
+    document.addEventListener('DOMContentLoaded', checkVaultStatus);
+</script>
+}

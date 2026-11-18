@@ -1,0 +1,114 @@
+﻿@inject I18nService I18nService
+@{
+    ViewData["Title"] = "Privacy Notice";
+    var settings = ViewBag.Settings as SystemSettings ?? new SystemSettings();
+}
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+    <div class="bg-white border border-[#DCE2D8] rounded-2xl p-6 sm:p-10 space-y-7">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                Before you begin · RA 10173 (Data Privacy Act)
+            </p>
+            <h1 class="font-serif text-3xl font-semibold text-[#16211A]">
+                How your information is handled.
+            </h1>
+            <p class="text-sm text-[#45544B] leading-relaxed">
+                SAGIP is a confidential support tool, not an emergency service. Please take a moment to review these commitments before continuing.
+            </p>
+        </div>
+
+        <ul class="space-y-3 text-sm text-[#16211A] border-t border-b border-[#DCE2D8] py-6">
+            <li class="flex items-start gap-3">
+                <i data-lucide="check" class="w-4 h-4 text-[#2F6347] shrink-0 mt-0.5"></i>
+                <span>We ask only for what is needed to route your report safely.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <i data-lucide="check" class="w-4 h-4 text-[#2F6347] shrink-0 mt-0.5"></i>
+                <span>No third-party analytics, trackers, or external scripts. We do not record your IP address or browser user-agent.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <i data-lucide="check" class="w-4 h-4 text-[#2F6347] shrink-0 mt-0.5"></i>
+                <span>Sensitive details are encrypted. Only authorized barangay VAWC desk officers can read your report.</span>
+            </li>
+            <li class="flex items-start gap-3">
+                <i data-lucide="check" class="w-4 h-4 text-[#2F6347] shrink-0 mt-0.5"></i>
+                <span>You decide what to share, and you can leave immediately at any time with Quick Exit.</span>
+            </li>
+        </ul>
+
+        <div class="bg-[#EAF0E8] border border-[#C9D6C5] rounded-xl p-4 space-y-1">
+            <p class="text-xs font-semibold text-[#1B3B2B]">Who is responsible for your data</p>
+            <p class="text-sm text-[#16211A]">
+                @settings.DpoName · @settings.DpoContact
+            </p>
+        </div>
+
+        <div class="bg-[#FBF1EC] border border-[#E6C8BC] rounded-xl p-4 flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-[#8A3422] shrink-0 mt-0.5"></i>
+            <div class="text-xs text-[#8A3422] space-y-1 leading-relaxed">
+                <p class="font-semibold">A small safety check</p>
+                <p>
+                    Quick Exit leaves this site right away, but it does not erase your browser history. If someone checks your phone or computer, consider opening a private window. Note that private incident notebook entries are deleted when a private window closes.
+                </p>
+            </div>
+        </div>
+
+        <div id="fullNoticeBox" class="hidden bg-[#F6F4EC] border border-[#DCE2D8] rounded-xl p-5 text-xs text-[#45544B] space-y-2 leading-relaxed">
+            <p class="font-semibold text-[#16211A]">Full RA 10173 Data Privacy Summary</p>
+            <p>
+                Under the Data Privacy Act of 2012 (Republic Act No. 10173), you retain full rights over your personal data, including the right to withdraw consent for contact at any time using your report’s reference code.
+            </p>
+            <p>
+                Administrators manage system staff and contacts only and are technically blocked from viewing case narratives or reporter identities. Closed case records follow a @settings.RetentionYears-year retention policy.
+            </p>
+        </div>
+
+        <label class="flex items-start gap-3 p-4 rounded-xl border border-[#DCE2D8] bg-[#F6F4EC] cursor-pointer">
+            <input type="checkbox" id="privacyConsentCheckbox" onchange="toggleContinueBtn()" class="mt-0.5 w-4 h-4 accent-[#214A35] rounded" />
+            <span class="text-sm font-medium text-[#16211A]">
+                I have read the privacy notice (RA 10173).
+            </span>
+        </label>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <div class="flex items-center gap-4 text-xs">
+                <button type="button" onclick="toggleFullNotice()" id="toggleNoticeBtn" class="text-[#214A35] font-semibold underline underline-offset-2 cursor-pointer">
+                    Read full notice
+                </button>
+                <a asp-controller="Home" asp-action="Index" class="text-[#66756B] hover:text-[#16211A] cursor-pointer">
+                    ← Back to home
+                </a>
+            </div>
+
+            <a asp-controller="Report" asp-action="Index" id="continueToReportBtn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors bg-[#DCE2D8] text-[#66756B] pointer-events-none cursor-not-allowed text-center">
+                <i data-lucide="shield" class="w-4 h-4 shrink-0"></i>
+                <span>Accept and continue</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 shrink-0"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function toggleFullNotice() {
+        const box = document.getElementById('fullNoticeBox');
+        const btn = document.getElementById('toggleNoticeBtn');
+        box.classList.toggle('hidden');
+        btn.textContent = box.classList.contains('hidden') ? 'Read full notice' : 'Hide full notice';
+    }
+
+    function toggleContinueBtn() {
+        const cb = document.getElementById('privacyConsentCheckbox');
+        const btn = document.getElementById('continueToReportBtn');
+        if (cb.checked) {
+            btn.classList.remove('bg-[#DCE2D8]', 'text-[#66756B]', 'pointer-events-none', 'cursor-not-allowed');
+            btn.classList.add('bg-[#214A35]', 'hover:bg-[#183828]', 'text-white', 'cursor-pointer');
+        } else {
+            btn.classList.add('bg-[#DCE2D8]', 'text-[#66756B]', 'pointer-events-none', 'cursor-not-allowed');
+            btn.classList.remove('bg-[#214A35]', 'hover:bg-[#183828]', 'text-white', 'cursor-pointer');
+        }
+    }
+</script>
+}

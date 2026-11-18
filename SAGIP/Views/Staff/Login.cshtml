@@ -1,0 +1,171 @@
+@model StaffLoginViewModel
+@{
+    ViewData["Title"] = "Staff Sign In";
+}
+
+<div class="max-w-lg mx-auto px-4 sm:px-6 py-10 sm:py-12 space-y-6">
+    <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#45544B] hover:text-[#1B3B2B] whitespace-nowrap cursor-pointer">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>Back to reporter portal</span>
+    </a>
+
+    <div class="bg-white border border-[#DCE2D8] rounded-2xl p-6 sm:p-8 space-y-6">
+        <div class="space-y-1.5 border-b border-[#DCE2D8] pb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                @(Model.RequiresMfa ? "Step 2 of 2 · Verification code" : "Staff sign in · 2-step verification")
+            </p>
+            <h1 class="font-serif text-3xl font-semibold text-[#16211A]">
+                @(Model.RequiresMfa ? "Verify your identity." : "Sign in to your desk.")
+            </h1>
+            <p class="text-xs text-[#66756B] leading-relaxed">
+                @(Model.RequiresMfa ? "Enter the 6-digit code from your authenticator app or email." : "Enter your barangay staff email and password to begin verification.")
+            </p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div role="alert" class="bg-[#FBF1EC] border border-[#E6C8BC] text-[#8A3422] rounded-xl p-3.5 text-xs font-medium flex items-start gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                <span>@Model.ErrorMessage</span>
+            </div>
+        }
+
+        @if (!Model.RequiresMfa)
+        {
+            <!-- STEP 1 FORM -->
+            <form asp-action="Login" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                <div>
+                    <label for="staff-email" class="block text-xs font-semibold text-[#16211A] mb-1">
+                        Staff email
+                    </label>
+                    <input id="staff-email" type="email" asp-for="Email" required class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm text-[#16211A] focus:outline-none focus:border-[#214A35]" />
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="staff-pass" class="block text-xs font-semibold text-[#16211A]">
+                            Password
+                        </label>
+                        <a asp-action="ResetPassword" class="text-xs font-medium text-[#214A35] hover:underline cursor-pointer">
+                            Forgot password?
+                        </a>
+                    </div>
+                    <input id="staff-pass" type="password" asp-for="Password" required class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm text-[#16211A] focus:outline-none focus:border-[#214A35]" />
+                </div>
+
+                <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer">
+                    Continue to verification
+                </button>
+            </form>
+
+            <!-- Demo Workspaces matching SAGIP-INITIAL StaffAuthView -->
+            <div class="bg-[#F6F4EC] border border-[#DCE2D8] rounded-xl p-4 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs font-semibold text-[#16211A]">Demo workspaces</p>
+                    <span class="text-[11px] text-[#66756B]">Or sign in via 2-step above</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <!-- Maria Santos (Desk Officer) -->
+                    <div class="p-3 rounded-lg border border-[#C9D6C5] bg-[#EAF0E8] space-y-2">
+                        <div>
+                            <span class="text-xs font-semibold text-[#1B3B2B] block">
+                                VAWC Desk Officer Board
+                            </span>
+                            <span class="text-[11px] text-[#45544B]">
+                                Maria Santos · Case queue &amp; triage
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form asp-action="QuickLogin" method="post" class="flex-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="email" value="maria.santos@barangay.gov.ph" />
+                                <button type="submit" class="w-full py-1.5 px-2.5 rounded-md bg-[#214A35] hover:bg-[#183828] text-white text-[11px] font-semibold transition-colors cursor-pointer text-center">
+                                    Open Desk Board →
+                                </button>
+                            </form>
+                            <button type="button" onclick="fillStaff('maria.santos@barangay.gov.ph', 'barangay-vawc-2026')" class="py-1.5 px-2 rounded-md border border-[#DCE2D8] bg-white text-[11px] font-medium text-[#45544B] hover:border-[#214A35] cursor-pointer shrink-0">
+                                Fill
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Elena Cruz (Admin) -->
+                    <div class="p-3 rounded-lg border border-[#DCE2D8] bg-white space-y-2">
+                        <div>
+                            <span class="text-xs font-semibold text-[#16211A] block">
+                                Admin &amp; DPO Governance
+                            </span>
+                            <span class="text-[11px] text-[#66756B]">
+                                Elena Cruz · Staff &amp; Audit Trail
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form asp-action="QuickLogin" method="post" class="flex-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="email" value="elena.cruz@barangay.gov.ph" />
+                                <button type="submit" class="w-full py-1.5 px-2.5 rounded-md bg-[#1B3B2B] hover:bg-[#152E22] text-white text-[11px] font-semibold transition-colors cursor-pointer text-center">
+                                    Open Admin Board →
+                                </button>
+                            </form>
+                            <button type="button" onclick="fillStaff('elena.cruz@barangay.gov.ph', 'admin-vawc-2026')" class="py-1.5 px-2 rounded-md border border-[#DCE2D8] bg-white text-[11px] font-medium text-[#45544B] hover:border-[#214A35] cursor-pointer shrink-0">
+                                Fill
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- STEP 2 FORM -->
+            <form asp-action="Login" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="RequiresMfa" />
+                <input type="hidden" asp-for="PendingUserId" />
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+                <div class="bg-[#EAF0E8] border border-[#C9D6C5] rounded-xl p-3.5 text-xs text-[#1B3B2B]">
+                    <p class="font-semibold">Two-factor authentication code</p>
+                    <p class="text-[#45544B] mt-0.5">Enter the 6-digit verification code from your authenticator app.</p>
+                </div>
+
+                <div>
+                    <label for="mfa-code-input" class="block text-xs font-semibold text-[#16211A] mb-1">
+                        6-Digit Code
+                    </label>
+                    <input id="mfa-code-input" type="text" asp-for="MfaCode" autofocus maxlength="6" placeholder="123456" class="w-full text-center font-mono text-2xl tracking-[0.4em] py-3 rounded-lg border border-[#DCE2D8] focus:outline-none focus:border-[#214A35]" required />
+                    <p class="text-[11px] text-[#66756B] text-center mt-1">Demo code: <strong class="font-mono">123456</strong></p>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 px-4 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer">
+                    Verify &amp; enter workspace
+                </button>
+
+                <div class="text-center pt-2">
+                    <a asp-action="Login" class="text-xs text-[#66756B] hover:text-[#16211A]">Cancel and return</a>
+                </div>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function fillStaff(em, pass) {
+        document.getElementById('staff-email').value = em;
+        document.getElementById('staff-pass').value = pass;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const em = document.getElementById('staff-email');
+        const pass = document.getElementById('staff-pass');
+        if (em && !em.value) em.value = 'maria.santos@barangay.gov.ph';
+        if (pass && !pass.value) pass.value = 'barangay-vawc-2026';
+    });
+</script>
+}

@@ -1,0 +1,475 @@
+@model CaseDetailViewModel
+@{
+    Layout = "_StaffLayout";
+    ViewData["Title"] = $"Case {Model.Case.CaseNumber}";
+    var report = Model.Report;
+    var c = Model.Case;
+    var consent = Model.Consents.FirstOrDefault(cn => cn.ConsentType == "Contact");
+    var hasActiveConsent = consent != null && consent.Granted && !consent.WithdrawnAt.HasValue;
+    var assignedOfficer = Model.AvailableOfficers.FirstOrDefault(o => o.UserId == c.AssignedOfficerId);
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <!-- Breadcrumb & Back Link -->
+    <div class="flex items-center justify-between text-xs text-gray-500">
+        <a asp-action="Index" class="inline-flex items-center gap-1.5 text-[#1B4D3E] hover:underline font-semibold">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Return to Cases Registry</span>
+        </a>
+        <span>Viewing as: <strong>@Model.CurrentUser.FullName</strong> (Desk Officer)</span>
+    </div>
+
+    <!-- Conflict of Interest Banner if Flagged -->
+    @if (Model.IsConflictFlaggedByCurrent)
+    {
+        <div class="p-4 rounded-2xl bg-amber-100 border border-amber-300 text-amber-950 text-xs sm:text-sm flex items-start gap-3">
+            <i data-lucide="alert-octagon" class="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5"></i>
+            <div>
+                <strong class="font-bold">Conflict of Interest Declared:</strong>
+                You have recused yourself from managing this case. You may view records in read-only mode for audit transparency, but another desk officer should take ownership of proceedings.
+            </div>
+        </div>
+    }
+
+    <!-- Main Header Card -->
+    <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <span class="font-mono-code text-2xl sm:text-3xl font-extrabold text-[#1B4D3E]">@c.CaseNumber</span>
+                <span class="text-xs bg-[#F6F4EC] text-gray-600 px-2.5 py-1 rounded-lg border border-[#E2DEC9] font-mono">
+                    Ref: @report.ReferenceCode
+                </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                <span>Submitted: @report.SubmittedAt.ToString("MMM dd, yyyy · HH:mm UTC")</span>
+                <span>·</span>
+                <span class="font-semibold text-emerald-800">@(report.IsRA9262Pathway ? "RA 9262 Legal Pathway" : "General Protection Referral")</span>
+                <span>·</span>
+                <span>Victim: <strong>@report.VictimType</strong></span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Conflict Flagging Button -->
+            @if (!Model.IsConflictFlaggedByCurrent)
+            {
+                <form asp-action="FlagConflict" method="post" onsubmit="return confirm('Do you wish to declare a conflict of interest and recuse yourself from this case?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="caseId" value="@c.CaseId" />
+                    <button type="submit" class="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold transition-colors flex items-center gap-1.5" title="Recuse due to personal acquaintance or conflict">
+                        <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                        <span>Flag Conflict</span>
+                    </button>
+                </form>
+            }
+
+            <!-- Assign Officer Form -->
+            <form asp-action="AssignOfficer" method="post" class="flex items-center gap-1.5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="caseId" value="@c.CaseId" />
+                <select name="officerId" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none bg-white">
+                    <option value="">-- Unassigned --</option>
+                    @foreach (var off in Model.AvailableOfficers)
+                    {
+                        <option value="@off.UserId" selected="@(c.AssignedOfficerId == off.UserId)">Assign: @off.FullName</option>
+                    }
+                </select>
+            </form>
+
+            <!-- Quick Status Change Form -->
+            <form asp-action="UpdateStatus" method="post" class="flex items-center gap-1.5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="caseId" value="@c.CaseId" />
+                <select name="newStatus" onchange="this.form.submit()" class="px-3 py-2 rounded-xl border border-[#1B4D3E] bg-[#1B4D3E] text-white text-xs font-bold focus:outline-none transition-all duration-200 hover:bg-[#143d31] shadow-xs cursor-pointer">
+                    <option value="Received" selected="@(c.Status == "Received")">Status: Received</option>
+                    <option value="Under Assessment" selected="@(c.Status == "Under Assessment")">Status: Under Assessment</option>
+                    <option value="Referred" selected="@(c.Status == "Referred")">Status: Referred</option>
+                    <option value="BPO Issued" selected="@(c.Status == "BPO Issued")">Status: BPO Issued</option>
+                    <option value="Closed" selected="@(c.Status == "Closed")">Status: Closed</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2-Column Core Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Narrative, Reporter, Legal Tools (2 Cols wide) -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- 1. Incident Narrative Card -->
+            <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h3 class="font-bold text-base text-[#16211A] flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-5 h-5 text-[#1B4D3E]"></i>
+                        <span>Confidential Incident Narrative</span>
+                    </h3>
+                    <span class="text-xs text-gray-500 font-mono">Date: @(report.IncidentDate ?? "Not specified")</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-[#F6F4EC] p-3.5 rounded-xl border border-[#E2DEC9]/60">
+                    <div>
+                        <span class="text-gray-500 block">Setting / Location:</span>
+                        <strong class="text-[#16211A]">@(report.IncidentLocation ?? "Barangay Service Area")</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block">Alleged Offender:</span>
+                        <strong class="text-[#16211A]">@(report.OffenderRelationship ?? "Intimate partner")</strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block">Children Involved:</span>
+                        <strong class="text-[#16211A]">@(report.ChildrenInvolved ?? "No")</strong>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Statement of Facts</label>
+                    <div class="p-4 rounded-2xl bg-white border border-gray-200 text-sm text-[#16211A] leading-relaxed whitespace-pre-wrap">@report.IncidentDescription</div>
+                </div>
+
+                <!-- Attached Notebook Logs if present -->
+                @if (report.AttachedLogEntries.Count > 0)
+                {
+                    <div class="pt-3 border-t border-gray-100">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="book-lock" class="w-4 h-4 text-emerald-800"></i>
+                            <h4 class="font-bold text-xs text-gray-800 uppercase tracking-wider">
+                                Attached Private Incident Log Snapshots (@report.AttachedLogEntries.Count entries)
+                            </h4>
+                        </div>
+                        <div class="space-y-2">
+                            @foreach (var log in report.AttachedLogEntries)
+                            {
+                                <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 text-xs space-y-1">
+                                    <div class="flex items-center justify-between font-bold text-gray-700">
+                                        <span>@log.EntryDate</span>
+                                        <span class="text-gray-500 font-normal">Setting: @(log.Place ?? "Not noted")</span>
+                                    </div>
+                                    <p class="text-gray-800">@log.Description</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- 2. Reporter Identity & Consent Card -->
+            <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h3 class="font-bold text-base text-[#16211A] flex items-center gap-2">
+                        <i data-lucide="user-check" class="w-5 h-5 text-[#1B4D3E]"></i>
+                        <span>Reporter Identity & Contact Consent (RA 10173)</span>
+                    </h3>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold @(report.ReportType == "Anonymous" ? "bg-gray-100 text-gray-700" : "bg-emerald-100 text-emerald-900 border border-emerald-300")">
+                        @report.ReportType Report
+                    </span>
+                </div>
+
+                @if (report.ReportType == "Anonymous")
+                {
+                    <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs sm:text-sm text-gray-600 flex items-start gap-3">
+                        <i data-lucide="shield" class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <strong class="font-semibold text-gray-800 block">Strictly Anonymous Intake:</strong>
+                            The reporter has chosen not to share name, phone, or email. Communication is conducted exclusively via status lookups with Reference Code <code>@report.ReferenceCode</code>.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-xl @(hasActiveConsent ? "bg-emerald-50 border border-emerald-200 text-emerald-950" : "bg-rose-50 border border-rose-200 text-rose-950") text-xs">
+                            <span class="font-bold flex items-center gap-1.5">
+                                <i data-lucide="@(hasActiveConsent ? "check-circle" : "x-circle")" class="w-4 h-4"></i>
+                                Consent Status: @(hasActiveConsent ? "Granted & Active" : "Consent Withdrawn")
+                            </span>
+                            @if (!hasActiveConsent && consent?.WithdrawnAt != null)
+                            {
+                                <span class="font-mono text-[11px]">Withdrawn at: @consent.WithdrawnAt.Value.ToString("MMM dd, HH:mm")</span>
+                            }
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-[#F6F4EC] p-3.5 rounded-xl border border-[#E2DEC9]">
+                            <div>
+                                <span class="text-gray-500 block">Reporter Name:</span>
+                                <strong class="text-[#16211A] text-sm">@report.ReporterName</strong>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 block">Contact Method:</span>
+                                <strong class="text-[#16211A] text-sm">@report.ContactType: @report.ContactValue</strong>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 block">Safe Window:</span>
+                                <strong class="text-[#16211A]">@(report.SafeContactTime ?? "Anytime")</strong>
+                            </div>
+                        </div>
+
+                        @if (!hasActiveConsent)
+                        {
+                            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                                <strong>Notice to Officer:</strong> Do not initiate unsolicited outreach to the contact details above because the reporter has withdrawn consent under the Data Privacy Act.
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- 3. Legal Tools: Triage, BPO Issuance, and External Referral -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-base text-[#16211A] flex items-center gap-2">
+                    <i data-lucide="wrench" class="w-5 h-5 text-[#1B4D3E]"></i>
+                    <span>Officer Action Tools & Legal Pathways</span>
+                </h3>
+
+                <!-- Tool A: Triage & Assessment Outcome -->
+                <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                    <h4 class="font-bold text-sm text-[#16211A] flex items-center gap-2">
+                        <i data-lucide="clipboard-check" class="w-4 h-4 text-emerald-800"></i>
+                        <span>Case Triage & Legal Assessment</span>
+                    </h4>
+
+                    <form asp-action="SaveAssessment" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="caseId" value="@c.CaseId" />
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Urgency Level</label>
+                                <select name="urgency" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none">
+                                    <option value="High" selected="@(c.Urgency == "High")">High (Imminent Risk / Active Physical Harm)</option>
+                                    <option value="Medium" selected="@(c.Urgency == "Medium")">Medium (Intimidation / Ongoing Threats)</option>
+                                    <option value="Low" selected="@(c.Urgency == "Low")">Low (Mediation / Non-violent Dispute)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Eligibility Pathway</label>
+                                <select name="pathway" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none">
+                                    <option value="RA 9262 BPO" selected="@(c.EligibilityPathway == "RA 9262 BPO")">RA 9262 Barangay Protection Order</option>
+                                    <option value="External Referral" selected="@(c.EligibilityPathway == "External Referral")">Outside Referral (MSWDO/WCPD)</option>
+                                    <option value="Other Assistance" selected="@(c.EligibilityPathway == "Other Assistance")">Social Welfare / Counseling Only</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Abuse Types Identified (Select all that apply)</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer bg-gray-50">
+                                    <input type="checkbox" name="abuseTypes" value="Physical" checked="@(c.AbuseTypes.Contains("Physical"))" class="rounded text-[#1B4D3E] focus:ring-[#1B4D3E]" />
+                                    <span>Physical</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer bg-gray-50">
+                                    <input type="checkbox" name="abuseTypes" value="Psychological" checked="@(c.AbuseTypes.Contains("Psychological"))" class="rounded text-[#1B4D3E] focus:ring-[#1B4D3E]" />
+                                    <span>Psychological</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer bg-gray-50">
+                                    <input type="checkbox" name="abuseTypes" value="Sexual" checked="@(c.AbuseTypes.Contains("Sexual"))" class="rounded text-[#1B4D3E] focus:ring-[#1B4D3E]" />
+                                    <span>Sexual</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 cursor-pointer bg-gray-50">
+                                    <input type="checkbox" name="abuseTypes" value="Economic" checked="@(c.AbuseTypes.Contains("Economic"))" class="rounded text-[#1B4D3E] focus:ring-[#1B4D3E]" />
+                                    <span>Economic</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Assessment Findings & Action Plan</label>
+                            <textarea name="notes" rows="2" placeholder="Record safety observations, victim wishes, or recommended protective interventions..." class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none">@c.AssessmentNotes</textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-[#1B4D3E] hover:bg-[#12352B] text-white font-semibold text-xs transition-colors shadow-sm">
+                                Save Triage & Update Assessment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool B: Record Barangay Protection Order (BPO) -->
+                <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-sm text-[#16211A] flex items-center gap-2">
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i>
+                            <span>Barangay Protection Order (BPO) Issuance</span>
+                        </h4>
+                        @if (!string.IsNullOrEmpty(c.BpoReference))
+                        {
+                            <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded border border-emerald-300">
+                                Issued: @c.BpoReference
+                            </span>
+                        }
+                    </div>
+
+                    <form asp-action="RecordBpo" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="caseId" value="@c.CaseId" />
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">BPO Reference Number *</label>
+                                <input type="text" name="bpoRef" required value="@c.BpoReference" placeholder="e.g., BPO 2026-019" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Issuing Official *</label>
+                                <input type="text" name="issuedBy" required value="@(c.BpoIssuedBy ?? "Punong Barangay")" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Date Issued *</label>
+                                <input type="date" name="dateIssued" required value="@(c.BpoDateIssued ?? DateTime.UtcNow.ToString("yyyy-MM-dd"))" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Effective Until (15 Days Duration)</label>
+                                <input type="date" name="effectiveUntil" value="@(c.BpoEffectiveUntil ?? DateTime.UtcNow.AddDays(15).ToString("yyyy-MM-dd"))" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">BPO Conditions & Orders</label>
+                            <textarea name="notes" rows="2" placeholder="Restraining respondent from harassing, intimidating, or entering 500m perimeter..." class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none">@c.BpoNotes</textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                                <span>Record Official BPO Issuance</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tool C: Record Outside Referral -->
+                <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                    <h4 class="font-bold text-sm text-[#16211A] flex items-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4 text-purple-700"></i>
+                        <span>External Agency Referral</span>
+                    </h4>
+
+                    <form asp-action="RecordReferral" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="caseId" value="@c.CaseId" />
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Referral Agency / Office *</label>
+                                <select name="outsideOffice" required class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none">
+                                    <option value="Social Welfare Office (C/MSWDO)">Social Welfare Office (C/MSWDO)</option>
+                                    <option value="Women and Children Protection Desk (PNP WCPD)">Women and Children Protection Desk (PNP WCPD)</option>
+                                    <option value="Health Services · Rural Health Unit">Rural Health Unit (RHU Medico-legal)</option>
+                                    <option value="Public Attorney's Office (PAO)">Public Attorney's Office (PAO)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Referral Date *</label>
+                                <input type="date" name="referralDate" required value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Purpose of Referral *</label>
+                                <input type="text" name="purpose" required placeholder="e.g., Temporary shelter & family mediation" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Receiving Officer / Ref Code (Optional)</label>
+                                <input type="text" name="reference" placeholder="e.g., MSWDO-2026-092" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Referral Endorsement Notes</label>
+                            <textarea name="notes" rows="2" placeholder="Specific instructions or protective handoff details..." class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none"></textarea>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-semibold text-xs transition-colors shadow-sm flex items-center gap-1.5">
+                                <i data-lucide="share-2" class="w-4 h-4"></i>
+                                <span>Record Referral & Update Status</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Case Notes & Timeline History (1 Col wide) -->
+        <div class="space-y-6">
+
+            <!-- 1. Case Notes Card -->
+            <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                <h3 class="font-bold text-base text-[#16211A] flex items-center gap-2 border-b border-gray-100 pb-3">
+                    <i data-lucide="message-square" class="w-5 h-5 text-[#1B4D3E]"></i>
+                    <span>Internal Case Notes</span>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-mono">@Model.Notes.Count</span>
+                </h3>
+
+                <!-- Add Note Form -->
+                <form asp-action="AddNote" method="post" class="space-y-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="caseId" value="@c.CaseId" />
+                    <textarea name="noteText" rows="3" required placeholder="Write a confidential note (call attempt, witness interview, shelter status)..." class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#1B4D3E] focus:outline-none"></textarea>
+                    <button type="submit" class="w-full py-2 px-3 rounded-xl bg-[#1B4D3E] hover:bg-[#12352B] text-white font-semibold text-xs shadow-sm transition-colors flex items-center justify-center gap-1.5">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>Add Note</span>
+                    </button>
+                </form>
+
+                <!-- Notes List -->
+                <div class="space-y-3 pt-2">
+                    @foreach (var n in Model.Notes)
+                    {
+                        <div class="p-3.5 rounded-xl bg-[#F6F4EC] border border-[#E2DEC9]/60 text-xs space-y-1">
+                            <div class="flex items-center justify-between text-gray-500 text-[11px]">
+                                <span class="font-bold text-gray-800">@n.AuthorName</span>
+                                <span>@n.CreatedAt.ToString("MMM dd, HH:mm")</span>
+                            </div>
+                            <p class="text-[#16211A] leading-relaxed whitespace-pre-wrap">@n.NoteText</p>
+                        </div>
+                    }
+                    @if (Model.Notes.Count == 0)
+                    {
+                        <p class="text-xs text-gray-400 italic text-center py-4">No internal notes added yet.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- 2. Status Transition Audit Timeline -->
+            <div class="bg-white rounded-3xl border border-[#E2DEC9] p-6 shadow-sm space-y-4">
+                <h3 class="font-bold text-base text-[#16211A] flex items-center gap-2 border-b border-gray-100 pb-3">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-500"></i>
+                    <span>Status History Timeline</span>
+                </h3>
+
+                <div class="space-y-4 text-xs">
+                    @foreach (var hist in Model.StatusHistory)
+                    {
+                        <div class="flex items-start gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full bg-[#1B4D3E] mt-1.5 flex-shrink-0"></div>
+                            <div class="flex-1 space-y-0.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-gray-900">@hist.ToStatus</span>
+                                    <span class="text-gray-400 text-[11px]">@hist.ChangedAt.ToString("MMM dd, HH:mm")</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(hist.FromStatus))
+                                {
+                                    <p class="text-gray-500 text-[11px]">Changed from: @hist.FromStatus</p>
+                                }
+                                @if (!string.IsNullOrEmpty(hist.ChangedByName))
+                                {
+                                    <p class="text-emerald-800 font-semibold text-[11px]">By: @hist.ChangedByName</p>
+                                }
+                                @if (!string.IsNullOrEmpty(hist.Reason))
+                                {
+                                    <p class="text-gray-600 italic text-[11px]">"@hist.Reason"</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

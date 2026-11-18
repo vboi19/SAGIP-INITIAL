@@ -1,0 +1,382 @@
+@model AdminDashboardViewModel
+@{
+    Layout = "_StaffLayout";
+    ViewData["Title"] = "System Administration";
+    var activeTab = Model.ActiveTab;
+    var settings = Model.Settings;
+    var stats = Model.Stats;
+
+    var activeAdmins = Model.StaffUsers.Where(u => u.Role == "Administrator" && u.Status == "Active").ToList();
+    var activeOfficers = Model.StaffUsers.Where(u => u.Role == "DeskOfficer" && u.Status == "Active").ToList();
+    var pendingInvites = Model.StaffUsers.Where(u => u.Status == "Pending").ToList();
+}
+
+<div class="space-y-6">
+    <!-- ================= TAB: STAFF ACCOUNTS ================= -->
+    @if (activeTab == "staff")
+    {
+        <div class="space-y-6">
+            <div class="border-b border-[#DCE2D8] pb-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                    Role-based access control
+                </p>
+                <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                    Staff accounts
+                </h1>
+            </div>
+
+            <!-- Staff KPI Strip -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white border border-[#DCE2D8] rounded-xl p-4 space-y-1">
+                    <p class="text-xs text-[#66756B]">Active administrators</p>
+                    <p class="font-serif text-2xl font-semibold text-[#16211A] tabular-nums">
+                        @activeAdmins.Count.ToString("D2")
+                    </p>
+                    <p class="text-[11px] text-[#66756B]">At least one active admin required</p>
+                </div>
+                <div class="bg-white border border-[#DCE2D8] rounded-xl p-4 space-y-1">
+                    <p class="text-xs text-[#66756B]">Active desk officers</p>
+                    <p class="font-serif text-2xl font-semibold text-[#16211A] tabular-nums">
+                        @activeOfficers.Count.ToString("D2")
+                    </p>
+                    <p class="text-[11px] text-[#66756B]">Authorized for case narratives</p>
+                </div>
+                <div class="bg-white border border-[#DCE2D8] rounded-xl p-4 space-y-1">
+                    <p class="text-xs text-[#66756B]">Pending invitations</p>
+                    <p class="font-serif text-2xl font-semibold text-[#16211A] tabular-nums">
+                        @pendingInvites.Count.ToString("D2")
+                    </p>
+                    <p class="text-[11px] text-[#66756B]">Awaiting setup &amp; verification</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <div class="lg:col-span-8 bg-white border border-[#DCE2D8] rounded-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-[#F6F4EC] border-b border-[#DCE2D8] text-[#66756B] uppercase tracking-wider text-[11px]">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold">Staff member</th>
+                                    <th class="py-3 px-4 font-semibold">Role</th>
+                                    <th class="py-3 px-4 font-semibold">MFA</th>
+                                    <th class="py-3 px-4 font-semibold">Status</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#DCE2D8]">
+                                @foreach (var u in Model.StaffUsers)
+                                {
+                                    <tr class="hover:bg-[#EAF0E8]/50 transition-colors duration-150">
+                                        <td class="py-3 px-4">
+                                            <p class="font-semibold text-[#16211A]">@u.FullName</p>
+                                            <p class="text-[#66756B]">@u.Email</p>
+                                        </td>
+                                        <td class="py-3 px-4 text-[#45544B]">@u.Role</td>
+                                        <td class="py-3 px-4 text-[#45544B]">@u.MfaMethod</td>
+                                        <td class="py-3 px-4 font-semibold">
+                                            <span class="@(u.Status == "Active" ? "text-[#214A35]" : u.Status == "Pending" ? "text-[#9A3F2B]" : "text-[#66756B]")">
+                                                @u.Status
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 text-right space-x-3 whitespace-nowrap">
+                                            @if (u.Status == "Pending")
+                                            {
+                                                <form asp-action="GenerateResetLink" method="post" class="inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@u.UserId" />
+                                                    <button type="submit" class="text-[#214A35] font-semibold hover:underline cursor-pointer">
+                                                        Resend invite
+                                                    </button>
+                                                </form>
+                                                <form asp-action="RevokeInvite" method="post" class="inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@u.UserId" />
+                                                    <button type="submit" class="text-[#8A3422] font-semibold hover:underline cursor-pointer">
+                                                        Revoke
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="GenerateResetLink" method="post" class="inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@u.UserId" />
+                                                    <button type="submit" class="text-[#214A35] hover:underline cursor-pointer">
+                                                        Reset PW
+                                                    </button>
+                                                </form>
+                                                <form asp-action="ToggleUserStatus" method="post" class="inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@u.UserId" />
+                                                    <button type="submit" class="text-[#8A3422] hover:underline cursor-pointer">
+                                                        @(u.Status == "Active" ? "Deactivate" : "Activate")
+                                                    </button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Enroll New Staff Card -->
+                <div class="lg:col-span-4 bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-4">
+                    <div>
+                        <h3 class="font-serif text-lg font-semibold text-[#16211A]">Enroll staff member</h3>
+                        <p class="text-xs text-[#66756B] mt-0.5">Issues a single-use setup link for MFA registration.</p>
+                    </div>
+
+                    <form asp-action="CreateUser" method="post" class="space-y-3 text-xs">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Full name</label>
+                            <input type="text" name="fullName" required placeholder="Elena Cruz" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Government / Barangay email</label>
+                            <input type="email" name="email" required placeholder="elena@barangay.gov.ph" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Role</label>
+                            <select name="role" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none bg-white">
+                                <option value="DeskOfficer">VAWC Desk Officer</option>
+                                <option value="Administrator">System Administrator</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Required MFA method</label>
+                            <select name="mfaMethod" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none bg-white">
+                                <option value="Authenticator app (TOTP)">Authenticator app (TOTP)</option>
+                                <option value="SMS code">SMS code</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white font-semibold transition-colors cursor-pointer">
+                            Issue setup link
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ================= TAB: SUPPORT CONTACTS ================= -->
+    @if (activeTab == "contacts")
+    {
+        <div class="space-y-6">
+            <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#DCE2D8] pb-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                        Emergency &amp; social services directory
+                    </p>
+                    <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                        Support contacts
+                    </h1>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <div class="lg:col-span-8 bg-white border border-[#DCE2D8] rounded-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-[#F6F4EC] border-b border-[#DCE2D8] text-[#66756B] uppercase tracking-wider text-[11px]">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold">Contact / Service</th>
+                                    <th class="py-3 px-4 font-semibold">Category</th>
+                                    <th class="py-3 px-4 font-semibold">Phone / Email</th>
+                                    <th class="py-3 px-4 font-semibold">Hours</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#DCE2D8]">
+                                @foreach (var contact in Model.SupportContacts)
+                                {
+                                    <tr>
+                                        <td class="py-3 px-4">
+                                            <p class="font-semibold text-[#16211A]">@contact.Name</p>
+                                            <p class="text-[#66756B]">@contact.Address</p>
+                                        </td>
+                                        <td class="py-3 px-4 text-[#45544B]">@contact.Category</td>
+                                        <td class="py-3 px-4">
+                                            <p class="font-mono text-[#16211A]">@contact.Phone</p>
+                                            <p class="text-[#66756B]">@contact.Email</p>
+                                        </td>
+                                        <td class="py-3 px-4 text-[#45544B]">@contact.OperatingHours</td>
+                                        <td class="py-3 px-4 text-right">
+                                            <form asp-action="DeleteSupportContact" method="post" class="inline" onsubmit="return confirm('Delete this support contact?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="contactId" value="@contact.ContactId" />
+                                                <button type="submit" class="text-[#8A3422] hover:underline font-semibold cursor-pointer">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add Contact Card -->
+                <div class="lg:col-span-4 bg-white border border-[#DCE2D8] rounded-xl p-5 space-y-4">
+                    <div>
+                        <h3 class="font-serif text-lg font-semibold text-[#16211A]">Add support contact</h3>
+                        <p class="text-xs text-[#66756B] mt-0.5">Directory listings shown to public and desk officers.</p>
+                    </div>
+
+                    <form asp-action="SaveSupportContact" method="post" class="space-y-3 text-xs">
+                        @Html.AntiForgeryToken()
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Organization name</label>
+                            <input type="text" name="name" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Category</label>
+                            <select name="category" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none bg-white">
+                                <option value="Emergency">Emergency</option>
+                                <option value="Police / WCPD">Police / WCPD</option>
+                                <option value="Social Welfare">Social Welfare</option>
+                                <option value="Legal Aid">Legal Aid</option>
+                                <option value="Shelter & Crisis">Shelter & Crisis</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Phone</label>
+                            <input type="text" name="phone" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Email</label>
+                            <input type="email" name="email" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Address / Location</label>
+                            <input type="text" name="address" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-medium text-[#45544B] mb-1">Operating hours</label>
+                            <input type="text" name="operatingHours" value="24/7" class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] focus:border-[#214A35] focus:outline-none" />
+                        </div>
+                        <button type="submit" class="w-full py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white font-semibold transition-colors cursor-pointer">
+                            Add contact
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ================= TAB: SYSTEM SETTINGS ================= -->
+    @if (activeTab == "settings")
+    {
+        <div class="space-y-6">
+            <div class="border-b border-[#DCE2D8] pb-4">
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                    Barangay &amp; desk configuration
+                </p>
+                <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                    System settings
+                </h1>
+            </div>
+
+            <div class="bg-white border border-[#DCE2D8] rounded-xl p-6 max-w-2xl">
+                <form asp-action="UpdateSettings" method="post" class="space-y-4 text-xs">
+                    @Html.AntiForgeryToken()
+                    <div>
+                        <label class="block font-medium text-[#45544B] mb-1">Barangay Name</label>
+                        <input type="text" name="BarangayName" value="@settings.BarangayName" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] text-sm focus:border-[#214A35] focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block font-medium text-[#45544B] mb-1">Receiving Office Name</label>
+                        <input type="text" name="ReceivingOfficeName" value="@settings.ReceivingOfficeName" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] text-sm focus:border-[#214A35] focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block font-medium text-[#45544B] mb-1">Service Area Description</label>
+                        <input type="text" name="ServiceArea" value="@settings.ServiceArea" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] text-sm focus:border-[#214A35] focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block font-medium text-[#45544B] mb-1">Inactivity Alert Threshold (Hours)</label>
+                        <input type="number" name="AlertThresholdHours" value="@settings.AlertThresholdHours" min="1" max="168" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] text-sm focus:border-[#214A35] focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block font-medium text-[#45544B] mb-1">Quick Exit Destination URL</label>
+                        <input type="url" name="SafeExitUrl" value="@settings.SafeExitUrl" required class="w-full px-3 py-2 rounded-lg border border-[#DCE2D8] text-sm focus:border-[#214A35] focus:outline-none" />
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white font-semibold transition-colors cursor-pointer text-xs">
+                            Save settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <!-- ================= TAB: AUDIT LOGS ================= -->
+    @if (activeTab == "audit")
+    {
+        <div class="space-y-6">
+            <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#DCE2D8] pb-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                        Append-only compliance log
+                    </p>
+                    <h1 class="font-serif text-3xl font-semibold text-[#16211A] mt-0.5">
+                        Audit logs
+                    </h1>
+                </div>
+            </div>
+
+            <div class="bg-white border border-[#DCE2D8] rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[#F6F4EC] border-b border-[#DCE2D8] text-[#66756B] uppercase tracking-wider text-[11px]">
+                            <tr>
+                                <th class="py-3 px-4 font-semibold">Timestamp</th>
+                                <th class="py-3 px-4 font-semibold">Actor / User</th>
+                                <th class="py-3 px-4 font-semibold">Action</th>
+                                <th class="py-3 px-4 font-semibold">Record</th>
+                                <th class="py-3 px-4 font-semibold">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-[#DCE2D8]">
+                            @foreach (var log in Model.AuditLogs)
+                            {
+                                <tr class="hover:bg-[#EAF0E8]/50 transition-colors duration-150">
+                                    <td class="py-3 px-4 text-[#66756B] font-mono whitespace-nowrap">
+                                        @log.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <p class="font-semibold text-[#16211A]">@(log.UserName ?? "System")</p>
+                                        <p class="text-[#66756B]">@log.ActorType</p>
+                                    </td>
+                                    <td class="py-3 px-4 font-semibold">
+                                        <span class="px-2 py-0.5 rounded text-[11px] @(log.Action == "SecurityViolationAttempt" ? "bg-[#FBF1EC] text-[#8A3422]" : "bg-[#EAF0E8] text-[#1B3B2B]")">
+                                            @log.Action
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-[#45544B]">
+                                        @log.RecordType @(log.RecordId != null ? $"· {log.RecordId}" : "")
+                                    </td>
+                                    <td class="py-3 px-4 text-[#66756B] font-mono text-[11px]">
+                                        @if (log.OldValue != null || log.NewValue != null)
+                                        {
+                                            <span>@log.OldValue → @log.NewValue</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ================= TAB: ANONYMIZED STATS ================= -->
+    @if (activeTab == "stats")
+    {
+        @await Html.PartialAsync("_AnonymizedStats")
+    }
+</div>

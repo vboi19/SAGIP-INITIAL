@@ -1,0 +1,617 @@
+﻿@inject I18nService I18nService
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var t = I18nService.T;
+    var isFil = I18nService.IsFilipino;
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+    var staffRole = HttpContextAccessor.HttpContext?.Session.GetString("StaffUserRole");
+    var staffName = HttpContextAccessor.HttpContext?.Session.GetString("StaffUserName");
+}
+<!DOCTYPE html>
+<html lang="@(isFil ? "fil" : "en")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} · " : "")sagip</title>
+
+    <!-- Google Fonts matching @@fontsource imports in SAGIP-INITIAL -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Immediate Theme Initialization (Prevents flash of light theme) -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('sagip_theme');
+            if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        forest: {
+                            950: '#152E22',
+                            900: '#1B3B2B',
+                            800: '#214A35',
+                            700: '#2F6347',
+                        },
+                        sage: {
+                            200: '#C9D6C5',
+                            100: '#EAF0E8',
+                            50: '#F2F5EF',
+                        },
+                        terracotta: {
+                            800: '#8A3422',
+                            700: '#9A3F2B',
+                            200: '#E6C8BC',
+                            50: '#FBF1EC',
+                        },
+                        canvas: '#F6F4EC',
+                        surface: '#FFFFFF',
+                        mist: '#EEF2EB',
+                        hairline: '#DCE2D8'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+                        serif: ['"Fraunces"', 'Georgia', 'Cambria', '"Times New Roman"', 'serif'],
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        body {
+            font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            color: #16211A;
+            background-color: #F6F4EC;
+            scroll-behavior: smooth;
+        }
+        h1, h2, .font-display {
+            font-family: "Fraunces", Georgia, Cambria, serif;
+            text-wrap: balance;
+        }
+        button, a, input, select, textarea {
+            &:focus-visible {
+                outline: 2px solid #214A35;
+                outline-offset: 2px;
+            }
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Comprehensive Dark Mode Rules */
+        html.dark {
+            color-scheme: dark;
+        }
+        html.dark, html.dark body {
+            background-color: #0c1711 !important;
+            color: #eaf0e8 !important;
+        }
+        html.dark .bg-\[\#F6F4EC\],
+        html.dark [class*="bg-[#F6F4EC]"] {
+            background-color: #0c1711 !important;
+        }
+        html.dark header.bg-\[\#F6F4EC\]\/95,
+        html.dark header {
+            background-color: rgba(12, 23, 17, 0.95) !important;
+            border-color: #213c2c !important;
+        }
+        html.dark .bg-white {
+            background-color: #13241b !important;
+            color: #eaf0e8 !important;
+        }
+        html.dark .bg-\[\#EAF0E8\],
+        html.dark [class*="bg-[#EAF0E8]"] {
+            background-color: #172d21 !important;
+            color: #d6e4d8 !important;
+        }
+        html.dark .bg-\[\#F2F5EF\],
+        html.dark [class*="bg-[#F2F5EF]"] {
+            background-color: #15291f !important;
+        }
+        html.dark .bg-\[\#152E22\] {
+            background-color: #08120c !important;
+        }
+        html.dark .bg-\[\#1B3B2B\] {
+            background-color: #0d1e15 !important;
+        }
+        html.dark .bg-\[\#FBF1EC\] {
+            background-color: #2b1510 !important;
+            border-color: #592419 !important;
+            color: #f4c2b7 !important;
+        }
+        html.dark .border-\[\#DCE2D8\],
+        html.dark .border-\[\#C9D6C5\],
+        html.dark .border-\[\#E2DEC9\] {
+            border-color: #213c2c !important;
+        }
+        html.dark .divide-\[\#DCE2D8\] > :not([hidden]) ~ :not([hidden]) {
+            border-color: #213c2c !important;
+        }
+        html.dark .text-\[\#16211A\],
+        html.dark .text-\[\#1B3B2B\] {
+            color: #eaf0e8 !important;
+        }
+        html.dark .text-\[\#45544B\] {
+            color: #adc1b2 !important;
+        }
+        html.dark .text-\[\#66756B\],
+        html.dark .text-\[\#526058\] {
+            color: #89a08f !important;
+        }
+        html.dark .text-\[\#214A35\],
+        html.dark .text-\[\#2F6347\] {
+            color: #6bbe8c !important;
+        }
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            background-color: #102117 !important;
+            color: #eaf0e8 !important;
+            border-color: #284735 !important;
+        }
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #667e6e !important;
+        }
+        html.dark #quick-exit-gate {
+            background-color: rgba(0, 0, 0, 0.85) !important;
+        }
+        html.dark #quick-exit-gate > div {
+            background-color: #13241b !important;
+            border-color: #213c2c !important;
+        }
+        html.dark #mobile-nav-drawer {
+            background-color: #0c1711 !important;
+            border-color: #213c2c !important;
+        }
+        html.dark .hover\:bg-\[\#EAF0E8\]\/50:hover {
+            background-color: rgba(23, 45, 33, 0.6) !important;
+        }
+        html.dark tr.hover\:bg-\[\#EAF0E8\]\/50:hover td {
+            background-color: rgba(23, 45, 33, 0.6) !important;
+        }
+        html.dark .bg-\[\#F6F4EC\] table thead,
+        html.dark table thead.bg-\[\#F6F4EC\] {
+            background-color: #102117 !important;
+        }
+
+        /* Ambient Transitions & Animation System */
+        body, header, aside, main, footer, .theme-transition {
+            transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
+        }
+
+        /* 1. Ambient "Hinga" Breathing Cadence */
+        @@keyframes hingaBreathing {
+            0%, 100% {
+                transform: scale(0.96);
+                opacity: 0.10;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.28;
+            }
+        }
+        @@keyframes hingaRingsPulse {
+            0%, 100% {
+                stroke-width: 1.2px;
+                opacity: 0.45;
+            }
+            50% {
+                stroke-width: 2.2px;
+                opacity: 0.95;
+            }
+        }
+        @@keyframes hingaDotBreathe {
+            0%, 100% {
+                transform: scale(0.85);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+            }
+        }
+        .hinga-arcs-container {
+            animation: hingaBreathing 8s ease-in-out infinite;
+            transform-origin: 90% 90%;
+            will-change: transform, opacity;
+        }
+        .hinga-ring {
+            animation: hingaRingsPulse 8s ease-in-out infinite;
+        }
+        .hinga-ring-2 {
+            animation-delay: 0.8s;
+        }
+        .hinga-ring-3 {
+            animation-delay: 1.6s;
+        }
+        .hinga-dot {
+            animation: hingaDotBreathe 8s ease-in-out infinite;
+        }
+
+        /* 7. Solar/Lunar Celestial Morph */
+        .celestial-morph-icon {
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+
+        /* 5. Calm Unfolding Step Progression */
+        @@keyframes stepUnfoldFade {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .step-pane-enter {
+            animation: stepUnfoldFade 0.34s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Interactive Choice Cards */
+        .choice-card-interactive {
+            transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                        background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.2s ease, 
+                        transform 0.15s ease;
+        }
+        .choice-card-interactive:active {
+            transform: scale(0.99);
+        }
+        .choice-card-selected {
+            border-color: #214A35 !important;
+            background-color: #F2F5EF !important;
+            box-shadow: 0 1px 3px rgba(33, 74, 53, 0.08) !important;
+        }
+        html.dark .choice-card-selected {
+            border-color: #4ade80 !important;
+            background-color: #172d21 !important;
+        }
+
+        /* 3. Status Stepper Ambient Pulse */
+        @@keyframes activeStageGlow {
+            0%, 100% {
+                transform: scale(0.92);
+                opacity: 0.65;
+            }
+            50% {
+                transform: scale(1.28);
+                opacity: 1;
+            }
+        }
+        .status-dot-pulse {
+            animation: activeStageGlow 2.5s ease-in-out infinite;
+        }
+
+        /* 6. Primary Desk Active Halo */
+        @@keyframes deskActiveHalo {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(200, 222, 201, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(200, 222, 201, 0.05);
+            }
+        }
+        .primary-desk-halo {
+            animation: deskActiveHalo 3.5s ease-in-out infinite;
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .hinga-arcs-container, .hinga-ring, .hinga-dot, .celestial-morph-icon, .step-pane-enter,
+            .status-dot-pulse, .primary-desk-halo,
+            body, header, aside, main, footer {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#F6F4EC] text-[#16211A] overflow-x-hidden">
+
+    <!-- Non-sticky emergency and language utility strip (IR-003, IR-004) -->
+    <div class="bg-[#152E22] text-[#E3EBE0] text-xs border-b border-[#214A35]/60">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] sm:text-xs">
+                <span class="font-medium text-white">@t.EmergencyStrip</span>
+                <a asp-controller="Home" asp-action="Contacts" class="underline underline-offset-2 text-[#C8DEC9] hover:text-white transition-colors cursor-pointer">
+                    @t.SupportContactsLink
+                </a>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                <!-- Solar / Lunar Celestial Morph Toggle -->
+                <button type="button" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle dark / light mode" aria-label="Toggle dark mode" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#1B3B2B] text-[#E3EBE0] border border-[#2F6347]/70 hover:border-[#C8DEC9]/50 hover:text-white transition-all cursor-pointer shadow-xs">
+                    <span class="relative w-3.5 h-3.5 flex items-center justify-center shrink-0 overflow-hidden">
+                        <i data-lucide="sun" id="theme-icon-sun" class="celestial-morph-icon w-3.5 h-3.5 absolute text-amber-300 transform scale-100 rotate-0 opacity-100"></i>
+                        <i data-lucide="moon" id="theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#C8DEC9] transform scale-0 -rotate-90 opacity-0"></i>
+                    </span>
+                    <span id="theme-text" class="tracking-wide">Light</span>
+                </button>
+
+                <!-- Language Pill Toggle -->
+                <div class="inline-flex items-center rounded-md bg-[#1B3B2B] p-0.5 border border-[#2F6347]/70" role="group" aria-label="Language">
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" name="lang" value="en" class="px-2 py-0.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer @(!isFil ? "bg-[#F6F4EC] text-[#152E22]" : "text-[#C8DEC9] hover:text-white")">
+                            EN
+                        </button>
+                    </form>
+                    <form asp-controller="Home" asp-action="SetLanguage" method="post" class="inline">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" name="lang" value="fil" class="px-2 py-0.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer @(isFil ? "bg-[#F6F4EC] text-[#152E22]" : "text-[#C8DEC9] hover:text-white")">
+                            FIL
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strict 3-zone sticky top bar contract (compact 60px height) -->
+    <header class="sticky top-0 z-40 bg-[#F6F4EC]/95 backdrop-blur border-b border-[#DCE2D8]">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-[60px] flex items-center justify-between gap-4 sm:gap-8">
+            <!-- Zone 1: Single-line brand wordmark -->
+            <a asp-controller="Home" asp-action="Index" class="font-serif text-2xl font-semibold tracking-tight text-[#1B3B2B] whitespace-nowrap shrink-0 cursor-pointer">
+                sagip
+            </a>
+
+            <!-- Zone 2: 4 single-line text nav links -->
+            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-[#45544B]" aria-label="Primary navigation">
+                <a asp-controller="Home" asp-action="Index" class="py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer border-b-2 @(currentController == "Home" && currentAction == "Index" ? "text-[#1B3B2B] border-[#214A35]" : "border-transparent hover:text-[#1B3B2B] hover:border-[#C9D6C5]")">
+                    @t.Nav.Home
+                </a>
+                <a asp-controller="Home" asp-action="Rights" class="py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer border-b-2 @(currentController == "Home" && currentAction == "Rights" ? "text-[#1B3B2B] border-[#214A35]" : "border-transparent hover:text-[#1B3B2B] hover:border-[#C9D6C5]")">
+                    @t.Nav.Rights
+                </a>
+                <a asp-controller="Home" asp-action="Contacts" class="py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer border-b-2 @(currentController == "Home" && currentAction == "Contacts" ? "text-[#1B3B2B] border-[#214A35]" : "border-transparent hover:text-[#1B3B2B] hover:border-[#C9D6C5]")">
+                    @t.Nav.Contacts
+                </a>
+                <a asp-controller="Status" asp-action="Index" class="py-1 transition-colors whitespace-nowrap shrink-0 cursor-pointer border-b-2 @(currentController == "Status" ? "text-[#1B3B2B] border-[#214A35]" : "border-transparent hover:text-[#1B3B2B] hover:border-[#C9D6C5]")">
+                    @t.Nav.Status
+                </a>
+            </nav>
+
+            <!-- Zone 3: 1 primary safety CTA -->
+            <div class="flex items-center gap-2 shrink-0">
+                @if (!string.IsNullOrEmpty(staffRole))
+                {
+                    <a href="@(staffRole == "Administrator" ? Url.Action("Index", "Admin") : Url.Action("Index", "DeskOfficer"))" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#EAF0E8] border border-[#C9D6C5] text-xs font-semibold text-[#1B3B2B] hover:bg-[#DCE2D8] transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        <span>@staffName</span>
+                    </a>
+                }
+
+                <button type="button" onclick="handleQuickExitClick()" class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-[#9A3F2B] hover:bg-[#8A3422] text-white text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                    <span>@t.Nav.QuickExit</span>
+                </button>
+
+                <!-- Mobile menu toggle button -->
+                <button type="button" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" class="md:hidden p-2 rounded-lg border border-[#DCE2D8] text-[#1B3B2B] hover:bg-[#EAF0E8] cursor-pointer">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile drawer -->
+        <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-[#DCE2D8] bg-[#F6F4EC] px-4 py-3 space-y-1">
+            <a asp-controller="Home" asp-action="Index" class="block w-full text-left py-2 px-3 rounded-lg text-sm font-medium text-[#16211A] hover:bg-[#EAF0E8]">
+                @t.Nav.Home
+            </a>
+            <a asp-controller="Home" asp-action="Rights" class="block w-full text-left py-2 px-3 rounded-lg text-sm font-medium text-[#16211A] hover:bg-[#EAF0E8]">
+                @t.Nav.Rights
+            </a>
+            <a asp-controller="Home" asp-action="Contacts" class="block w-full text-left py-2 px-3 rounded-lg text-sm font-medium text-[#16211A] hover:bg-[#EAF0E8]">
+                @t.Nav.Contacts
+            </a>
+            <a asp-controller="Status" asp-action="Index" class="block w-full text-left py-2 px-3 rounded-lg text-sm font-medium text-[#16211A] hover:bg-[#EAF0E8]">
+                @t.Nav.Status
+            </a>
+            <button type="button" onclick="toggleTheme()" class="w-full text-left py-2 px-3 rounded-lg text-sm font-medium text-[#16211A] hover:bg-[#EAF0E8] flex items-center justify-between border-t border-[#DCE2D8] mt-2 pt-2 cursor-pointer">
+                <span>Theme</span>
+                <span class="inline-flex items-center gap-2 font-semibold text-xs text-[#214A35]">
+                    <span class="relative w-3.5 h-3.5 flex items-center justify-center shrink-0 overflow-hidden">
+                        <i data-lucide="sun" id="mobile-theme-icon-sun" class="celestial-morph-icon w-3.5 h-3.5 absolute text-amber-500 transform scale-100 rotate-0 opacity-100"></i>
+                        <i data-lucide="moon" id="mobile-theme-icon-moon" class="celestial-morph-icon w-3.5 h-3.5 absolute text-[#214A35] transform scale-0 -rotate-90 opacity-0"></i>
+                    </span>
+                    <span id="mobile-theme-text">Light mode</span>
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full">
+        @RenderBody()
+    </main>
+
+    <!-- Footer matching Footer.tsx in SAGIP-INITIAL -->
+    <footer class="bg-[#1B3B2B] text-[#DCE6DA] border-t border-[#2F6347]/40 mt-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div class="space-y-1">
+                <div class="flex items-baseline gap-3">
+                    <span class="font-serif text-xl font-semibold text-white">sagip</span>
+                    <span class="text-xs text-[#B7CBB8]">@t.Footer.FullName</span>
+                </div>
+                <p class="text-xs text-[#B7CBB8]">@t.Footer.BottomNote</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-6 text-xs font-medium">
+                <a asp-controller="Home" asp-action="Privacy" class="text-[#DCE6DA] hover:text-white transition-colors cursor-pointer">
+                    @t.Footer.Privacy
+                </a>
+                <a asp-controller="Home" asp-action="Accessibility" class="text-[#DCE6DA] hover:text-white transition-colors cursor-pointer">
+                    @t.Footer.Accessibility
+                </a>
+                <a asp-controller="Staff" asp-action="Login" class="text-white hover:text-[#C8DEC9] underline underline-offset-4 transition-colors cursor-pointer">
+                    Desk Officer &amp; @t.Footer.StaffSignIn →
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Quick Exit Gate Modal matching QuickExitPrompt in QuickExitView.tsx -->
+    <div id="quick-exit-gate" class="fixed inset-0 z-50 bg-white hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="quick-exit-heading">
+        <div class="max-w-md w-full bg-[#F6F4EC] border border-[#DCE2D8] rounded-xl p-6 space-y-5">
+            <div class="space-y-2">
+                <h2 id="quick-exit-heading" class="font-serif text-xl font-semibold text-[#16211A]">
+                    Leaving safely
+                </h2>
+                <p class="text-sm text-[#45544B] leading-relaxed" id="quick-exit-prompt-body">
+                    Your session and unsaved form entries have been cleared. Press continue to open a neutral weather page.
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-2.5" id="quick-exit-buttons">
+                <!-- Buttons injected based on local notebook state -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Create Lucide icons
+        lucide.createIcons();
+
+        function toggleMobileNav() {
+            const drawer = document.getElementById('mobile-nav-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function handleQuickExitClick() {
+            let hasLog = false;
+            try {
+                hasLog = !!localStorage.getItem('sagip_incident_notebook') || !!localStorage.getItem('sagip_encrypted_notebook');
+            } catch(e) {}
+
+            const gate = document.getElementById('quick-exit-gate');
+            const promptBody = document.getElementById('quick-exit-prompt-body');
+            const btnWrap = document.getElementById('quick-exit-buttons');
+
+            if (hasLog) {
+                promptBody.textContent = 'Your session and unsaved form entries have been cleared. You also have an encrypted private notebook saved on this browser. Would you like to keep it or delete it?';
+                btnWrap.innerHTML = `
+                    <button type="button" onclick="performNeutralExit(false)" class="w-full py-2.5 px-4 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-medium transition-colors cursor-pointer">
+                        Keep private notebook &amp; open neutral page
+                    </button>
+                    <button type="button" onclick="performNeutralExit(true)" class="w-full py-2.5 px-4 rounded-lg bg-[#9A3F2B] hover:bg-[#8A3422] text-white text-sm font-medium transition-colors cursor-pointer">
+                        Also delete my private notebook &amp; exit
+                    </button>
+                    <button type="button" onclick="cancelQuickExit()" class="w-full py-2 px-4 rounded-lg border border-[#DCE2D8] text-[#45544B] hover:bg-white text-sm font-medium transition-colors cursor-pointer">
+                        Cancel
+                    </button>
+                `;
+                gate.classList.remove('hidden');
+                gate.classList.add('flex');
+            } else {
+                performNeutralExit(false);
+            }
+        }
+
+        function cancelQuickExit() {
+            const gate = document.getElementById('quick-exit-gate');
+            gate.classList.add('hidden');
+            gate.classList.remove('flex');
+        }
+
+        function performNeutralExit(wipe) {
+            if (wipe) {
+                try {
+                    localStorage.removeItem('sagip_incident_notebook');
+                    localStorage.removeItem('sagip_encrypted_notebook');
+                    sessionStorage.clear();
+                } catch(e) {}
+            }
+            window.location.replace('@Url.Action("QuickExit", "Home")');
+        }
+
+        // Global ESC shortcut
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                handleQuickExitClick();
+            }
+        });
+
+        // Theme Toggle Functionality (Dark / Light mode)
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('sagip_theme', isDark ? 'dark' : 'light');
+            syncThemeUI();
+        }
+
+        function syncThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const sun = document.getElementById('theme-icon-sun');
+            const moon = document.getElementById('theme-icon-moon');
+            const text = document.getElementById('theme-text');
+            const mobSun = document.getElementById('mobile-theme-icon-sun');
+            const mobMoon = document.getElementById('mobile-theme-icon-moon');
+            const mobText = document.getElementById('mobile-theme-text');
+
+            if (sun && moon) {
+                if (isDark) {
+                    sun.style.transform = 'scale(0) rotate(90deg)';
+                    sun.style.opacity = '0';
+                    moon.style.transform = 'scale(1) rotate(0deg)';
+                    moon.style.opacity = '1';
+                    if (text) text.textContent = 'Light';
+                } else {
+                    sun.style.transform = 'scale(1) rotate(0deg)';
+                    sun.style.opacity = '1';
+                    moon.style.transform = 'scale(0) rotate(-90deg)';
+                    moon.style.opacity = '0';
+                    if (text) text.textContent = 'Dark';
+                }
+            }
+
+            if (mobSun && mobMoon) {
+                if (isDark) {
+                    mobSun.style.transform = 'scale(0) rotate(90deg)';
+                    mobSun.style.opacity = '0';
+                    mobMoon.style.transform = 'scale(1) rotate(0deg)';
+                    mobMoon.style.opacity = '1';
+                } else {
+                    mobSun.style.transform = 'scale(1) rotate(0deg)';
+                    mobSun.style.opacity = '1';
+                    mobMoon.style.transform = 'scale(0) rotate(-90deg)';
+                    mobMoon.style.opacity = '0';
+                }
+            }
+
+            if (mobText) {
+                mobText.textContent = isDark ? 'Light mode' : 'Dark mode';
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', syncThemeUI);
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

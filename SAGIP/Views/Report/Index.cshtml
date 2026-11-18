@@ -1,0 +1,696 @@
+@model ReportFormModel
+@inject I18nService I18nService
+@{
+    ViewData["Title"] = "Start a Report";
+    var settings = ViewBag.Settings as SystemSettings ?? new SystemSettings();
+}
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-12 space-y-6 sm:space-y-8">
+    <div class="space-y-2">
+        <a asp-controller="Home" asp-action="Index" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#45544B] hover:text-[#1B3B2B] cursor-pointer mb-2">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Back to home</span>
+        </a>
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">
+                Confidential Report Wizard
+            </p>
+            <span id="step-counter-text" class="text-xs font-mono font-medium text-[#66756B]">
+                Step 1 of 4 · Who &amp; where
+            </span>
+        </div>
+
+        <!-- 4-step progress bar with smooth fluid transition -->
+        <div class="grid grid-cols-4 gap-2 pt-1">
+            <div id="pbar-1" class="h-1.5 rounded-full bg-[#214A35] transition-all duration-500 ease-out"></div>
+            <div id="pbar-2" class="h-1.5 rounded-full bg-[#DCE2D8] transition-all duration-500 ease-out"></div>
+            <div id="pbar-3" class="h-1.5 rounded-full bg-[#DCE2D8] transition-all duration-500 ease-out"></div>
+            <div id="pbar-4" class="h-1.5 rounded-full bg-[#DCE2D8] transition-all duration-500 ease-out"></div>
+        </div>
+
+        <!-- Calm Unfolding Settled Steps Shelf -->
+        <div id="settled-steps-shelf" class="hidden space-y-2 pt-2">
+            <div id="settled-step-1" class="hidden p-3 rounded-xl bg-[#EAF0E8] border border-[#C9D6C5] flex items-center justify-between text-xs text-[#1B3B2B] transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-[#2F6347] shrink-0"></i>
+                    <span><strong>Who &amp; where:</strong> <span id="settled-1-text">A woman · Within this barangay</span></span>
+                </div>
+                <button type="button" onclick="goToStep(1)" class="text-xs font-semibold text-[#214A35] underline hover:text-[#152E22] cursor-pointer shrink-0">Edit</button>
+            </div>
+            <div id="settled-step-2" class="hidden p-3 rounded-xl bg-[#EAF0E8] border border-[#C9D6C5] flex items-center justify-between text-xs text-[#1B3B2B] transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-[#2F6347] shrink-0"></i>
+                    <span><strong>Privacy choice:</strong> <span id="settled-2-text">Anonymous report</span></span>
+                </div>
+                <button type="button" onclick="goToStep(2)" class="text-xs font-semibold text-[#214A35] underline hover:text-[#152E22] cursor-pointer shrink-0">Edit</button>
+            </div>
+            <div id="settled-step-3" class="hidden p-3 rounded-xl bg-[#EAF0E8] border border-[#C9D6C5] flex items-center justify-between text-xs text-[#1B3B2B] transition-all">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-[#2F6347] shrink-0"></i>
+                    <span><strong>What happened:</strong> <span id="settled-3-text">Incident description recorded</span></span>
+                </div>
+                <button type="button" onclick="goToStep(3)" class="text-xs font-semibold text-[#214A35] underline hover:text-[#152E22] cursor-pointer shrink-0">Edit</button>
+            </div>
+        </div>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="bg-white border border-[#E6C8BC] rounded-xl p-4 text-xs text-[#8A3422] space-y-1">
+            <div asp-validation-summary="All"></div>
+        </div>
+    }
+
+    <form asp-action="Index" method="post" id="reportWizardForm" class="space-y-6">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="SubmissionToken" />
+        <input type="hidden" asp-for="AttachedLogsJson" id="attachedLogsJsonInput" />
+
+        <!-- Honeypot -->
+        <div style="display:none;" aria-hidden="true">
+            <input type="text" asp-for="Honeypot" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <!-- ================= STEP 1: WHO & WHERE ================= -->
+        <div id="step-pane-1" class="bg-white border border-[#DCE2D8] rounded-2xl p-4 sm:p-8 space-y-6">
+            <div class="space-y-1">
+                <h1 class="font-serif text-2xl font-semibold text-[#16211A]">
+                    Who experienced the abuse?
+                </h1>
+                <p class="text-sm text-[#45544B]">
+                    This helps route your report to the right legal pathway at the barangay desk.
+                </p>
+            </div>
+
+            <!-- Victim Type Choices -->
+            <div class="space-y-3">
+                <label class="choice-card choice-card-interactive flex items-start gap-3.5 p-4 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer bg-white">
+                    <input type="radio" asp-for="VictimType" value="Woman" checked id="vt-woman" onchange="handleVictimTypeChange()" class="mt-1 w-4 h-4 accent-[#214A35] shrink-0" />
+                    <div class="space-y-0.5">
+                        <p class="text-sm font-semibold text-[#16211A]">A woman</p>
+                        <p class="text-xs text-[#45544B] leading-relaxed">
+                            Handled under Republic Act 9262 (Anti-VAWC Act) by the barangay VAWC desk.
+                        </p>
+                    </div>
+                </label>
+
+                <label class="choice-card choice-card-interactive flex items-start gap-3.5 p-4 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer bg-white">
+                    <input type="radio" asp-for="VictimType" value="Child" id="vt-child" onchange="handleVictimTypeChange()" class="mt-1 w-4 h-4 accent-[#214A35] shrink-0" />
+                    <div class="space-y-0.5">
+                        <p class="text-sm font-semibold text-[#16211A]">A child or minor</p>
+                        <p class="text-xs text-[#45544B] leading-relaxed">
+                            Children are protected under RA 9262 and RA 7610.
+                        </p>
+                    </div>
+                </label>
+
+                <label class="choice-card choice-card-interactive flex items-start gap-3.5 p-4 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer bg-white">
+                    <input type="radio" asp-for="VictimType" value="Other" id="vt-other" onchange="handleVictimTypeChange()" class="mt-1 w-4 h-4 accent-[#214A35] shrink-0" />
+                    <div class="space-y-0.5">
+                        <p class="text-sm font-semibold text-[#16211A]">Other (e.g., elderly, other adult)</p>
+                        <p class="text-xs text-[#45544B] leading-relaxed">
+                            The desk still records the incident and assists you with referrals to appropriate social welfare or legal offices.
+                        </p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Child mother question if Child selected -->
+            <div id="childMotherBox" class="hidden p-4 rounded-xl bg-[#EAF0E8] border border-[#C9D6C5] space-y-2 transition-all duration-300">
+                <p class="text-xs font-semibold text-[#1B3B2B]">
+                    Is the child’s mother or female guardian also experiencing abuse?
+                </p>
+                <div class="flex items-center gap-4 text-xs font-medium text-[#16211A]">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" asp-for="ChildMotherAbused" class="w-4 h-4 accent-[#214A35] rounded" />
+                        <span>Yes, the mother/guardian also experienced violence or threats</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Jurisdiction -->
+            <div class="space-y-2 pt-4 border-t border-[#DCE2D8]">
+                <h2 class="font-serif text-lg font-semibold text-[#16211A]">
+                    Is the incident within this barangay?
+                </h2>
+                <p class="text-xs text-[#66756B]">
+                    Reports for this desk must take place in or involve a resident of this barangay.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <label class="choice-card choice-card-interactive flex items-center gap-3 p-3.5 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer text-xs font-medium bg-white">
+                        <input type="radio" asp-for="WithinBarangay" value="true" checked class="w-4 h-4 accent-[#214A35] shrink-0" />
+                        <span>Yes, within this barangay</span>
+                    </label>
+                    <label class="choice-card choice-card-interactive flex items-center gap-3 p-3.5 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer text-xs font-medium bg-white">
+                        <input type="radio" asp-for="WithinBarangay" value="false" class="w-4 h-4 accent-[#214A35] shrink-0" />
+                        <span>No, outside this barangay</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:justify-end gap-2 pt-4 border-t border-[#DCE2D8]">
+                <button type="button" onclick="goToStep(2)" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer">
+                    <span>Next: Privacy &amp; consent</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 2: PRIVACY & CONSENT ================= -->
+        <div id="step-pane-2" class="hidden bg-white border border-[#DCE2D8] rounded-2xl p-4 sm:p-8 space-y-6">
+            <div class="space-y-1">
+                <h2 class="font-serif text-2xl font-semibold text-[#16211A]">
+                    Choose how you want to report.
+                </h2>
+                <p class="text-sm text-[#45544B]">
+                    You can report anonymously or leave contact details for safe outreach.
+                </p>
+            </div>
+
+            <!-- Self vs Third-party -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-[#16211A]">Are you reporting for yourself or someone else?</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="choice-card choice-card-interactive flex items-center gap-3 p-3.5 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer text-xs font-medium bg-white">
+                        <input type="radio" asp-for="IsThirdParty" value="false" checked id="tp-self" onchange="toggleThirdParty()" class="w-4 h-4 accent-[#214A35] shrink-0" />
+                        <span>For myself</span>
+                    </label>
+                    <label class="choice-card choice-card-interactive flex items-center gap-3 p-3.5 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer text-xs font-medium bg-white">
+                        <input type="radio" asp-for="IsThirdParty" value="true" id="tp-third" onchange="toggleThirdParty()" class="w-4 h-4 accent-[#214A35] shrink-0" />
+                        <span>On behalf of someone else</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Relationship if Third party -->
+            <div id="tpRelBox" class="hidden space-y-1">
+                <label class="block text-xs font-semibold text-[#16211A]">How do you know the person?</label>
+                <input type="text" asp-for="RelationshipToVictim" placeholder="e.g. Neighbor, Sister, Friend" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm focus:outline-none" />
+            </div>
+
+            <!-- Anonymous vs Identified Radio -->
+            <div class="space-y-3 pt-2">
+                <label class="choice-card choice-card-interactive flex items-start gap-3.5 p-4 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer bg-white">
+                    <input type="radio" asp-for="ReportType" value="Anonymous" checked id="rt-anon" onchange="toggleReportType()" class="mt-1 w-4 h-4 accent-[#214A35] shrink-0" />
+                    <div class="space-y-0.5">
+                        <p class="text-sm font-semibold text-[#16211A]">Anonymous report</p>
+                        <p class="text-xs text-[#45544B] leading-relaxed">
+                            No name, email, or phone stored. You receive a reference code to check status. A Barangay Protection Order cannot be issued without identified victim participation.
+                        </p>
+                    </div>
+                </label>
+
+                <label class="choice-card choice-card-interactive flex items-start gap-3.5 p-4 rounded-xl border border-[#DCE2D8] hover:border-[#214A35] cursor-pointer bg-white">
+                    <input type="radio" asp-for="ReportType" value="Identified" id="rt-ident" onchange="toggleReportType()" class="mt-1 w-4 h-4 accent-[#214A35] shrink-0" />
+                    <div class="space-y-0.5">
+                        <p class="text-sm font-semibold text-[#16211A]">Identified report</p>
+                        <p class="text-xs text-[#45544B] leading-relaxed">
+                            Share contact details so a desk officer can reach out safely to assist with a protection order or intake interview.
+                        </p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Identified Fields -->
+            <div id="identifiedInputs" class="hidden space-y-4 p-4 sm:p-5 rounded-xl bg-[#F6F4EC] border border-[#DCE2D8]">
+                <p class="text-xs font-semibold uppercase tracking-wider text-[#2F6347]">Reporter contact information</p>
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">Your name or alias *</label>
+                    <input type="text" asp-for="ReporterName" placeholder="e.g. Maria Santos" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] bg-white text-sm" />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-[#16211A] mb-1">Contact method *</label>
+                        <select asp-for="ContactType" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] bg-white text-sm">
+                            <option value="Email">Email</option>
+                            <option value="Phone">Phone</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-[#16211A] mb-1">Email or Phone number *</label>
+                        <input type="text" asp-for="ContactValue" placeholder="name@example.com or 0917-xxx-xxxx" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] bg-white text-sm" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">When is it safe to contact you? *</label>
+                    <input type="text" asp-for="SafeContactTime" placeholder="e.g. Weekdays 9:00 AM – 12:00 PM only" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] bg-white text-sm" />
+                </div>
+
+                <label class="flex items-start gap-3 cursor-pointer pt-2 border-t border-[#DCE2D8]">
+                    <input type="checkbox" asp-for="ContactConsent" class="mt-0.5 w-4 h-4 accent-[#214A35] rounded shrink-0" />
+                    <span class="text-xs text-[#16211A] leading-relaxed">
+                        I give consent to the barangay VAWC desk officer to contact me using the provided details at the specified safe times.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Anonymous Acknowledgement Checkbox -->
+            <div id="anonAckBox" class="p-4 rounded-xl bg-[#EAF0E8] border border-[#C9D6C5]">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" id="anonAckCheckbox" class="mt-0.5 w-4 h-4 accent-[#214A35] rounded shrink-0" />
+                    <span class="text-xs text-[#1B3B2B] leading-relaxed font-medium">
+                        I understand that anonymous reports cannot receive direct follow-up or a Barangay Protection Order.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Option to attach notebook logs -->
+            <div id="notebookAttachBox" class="hidden p-4 rounded-xl bg-white border border-[#DCE2D8] space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-[#1B3B2B] flex items-center gap-1.5">
+                        <i data-lucide="lock" class="w-3.5 h-3.5"></i> Attach private notebook entries
+                    </span>
+                    <span id="notebookCountBadge" class="text-xs text-[#2F6347] font-mono"></span>
+                </div>
+                <label class="flex items-start gap-2.5 text-xs text-[#45544B] cursor-pointer">
+                    <input type="checkbox" asp-for="LogAttachmentConsent" id="notebookConsentCb" class="mt-0.5 w-4 h-4 accent-[#214A35] rounded shrink-0" />
+                    <span>Include my saved private notebook entries with this report for officer review.</span>
+                </label>
+            </div>
+
+            <!-- Trauma-Informed Calm Guidance Cue for Step 2 -->
+            <div id="cue-pane-2" class="hidden p-3.5 rounded-xl bg-[#FBF1EC] border border-[#E6C8BC] text-[#8A3422] text-xs flex items-start gap-2.5 transition-all">
+                <i data-lucide="heart-handshake" class="w-4 h-4 text-[#8A3422] shrink-0 mt-0.5"></i>
+                <span id="cue-text-2" class="leading-relaxed"></span>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-between items-stretch sm:items-center gap-2.5 pt-4 border-t border-[#DCE2D8]">
+                <button type="button" onclick="goToStep(1)" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-[#DCE2D8] text-[#45544B] text-sm font-semibold hover:bg-[#F6F4EC] text-center cursor-pointer">
+                    Back
+                </button>
+                <button type="button" onclick="goToStep(3)" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer">
+                    <span>Next: What happened</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 3: WHAT HAPPENED ================= -->
+        <div id="step-pane-3" class="hidden bg-white border border-[#DCE2D8] rounded-2xl p-4 sm:p-8 space-y-6">
+            <div class="space-y-1">
+                <h2 class="font-serif text-2xl font-semibold text-[#16211A]">
+                    Tell us what happened.
+                </h2>
+                <p class="text-sm text-[#45544B]">
+                    Share only what you are comfortable sharing right now.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">Date of incident (optional)</label>
+                    <input type="date" asp-for="IncidentDate" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">Location or landmark (optional)</label>
+                    <input type="text" asp-for="IncidentLocation" placeholder="e.g. Purok 3, Near public market" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">Relationship of offender</label>
+                    <select asp-for="OffenderRelationship" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm bg-white">
+                        <option value="Current spouse or partner">Current spouse or partner</option>
+                        <option value="Former spouse or partner">Former spouse or partner</option>
+                        <option value="Dating or intimate partner">Dating or intimate partner</option>
+                        <option value="Other family member">Other family member</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#16211A] mb-1">Children living in the household?</label>
+                    <select asp-for="ChildrenInvolved" class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm bg-white">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Skip">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-[#16211A]">Incident description *</label>
+                    <span id="descDraftIndicator" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#2F6347]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#2F6347] animate-pulse"></span>
+                        <span>Draft held safely in browser</span>
+                    </span>
+                </div>
+                <textarea asp-for="IncidentDescription" id="incDescInput" rows="5" required placeholder="Describe the incident, threats, words, or actions. Take your time." class="w-full px-3.5 py-2.5 rounded-lg border border-[#DCE2D8] text-sm focus:outline-none transition-all"></textarea>
+                <div class="flex items-center justify-between text-[11px] text-[#66756B] mt-1">
+                    <span>Share only what you are comfortable recording now.</span>
+                    <span id="descWordCount" class="font-mono">0 words</span>
+                </div>
+            </div>
+
+            <!-- Trauma-Informed Calm Guidance Cue for Step 3 -->
+            <div id="cue-pane-3" class="hidden p-3.5 rounded-xl bg-[#FBF1EC] border border-[#E6C8BC] text-[#8A3422] text-xs flex items-start gap-2.5 transition-all">
+                <i data-lucide="feather" class="w-4 h-4 text-[#8A3422] shrink-0 mt-0.5"></i>
+                <span id="cue-text-3" class="leading-relaxed"></span>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-between items-stretch sm:items-center gap-2.5 pt-4 border-t border-[#DCE2D8]">
+                <button type="button" onclick="goToStep(2)" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-[#DCE2D8] text-[#45544B] text-sm font-semibold hover:bg-[#F6F4EC] text-center cursor-pointer">
+                    Back
+                </button>
+                <button type="button" onclick="populateReview(); goToStep(4);" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors cursor-pointer">
+                    <span>Next: Review &amp; submit</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 4: REVIEW & SUBMIT ================= -->
+        <div id="step-pane-4" class="hidden bg-white border border-[#DCE2D8] rounded-2xl p-4 sm:p-8 space-y-6">
+            <div class="space-y-1">
+                <h2 class="font-serif text-2xl font-semibold text-[#16211A]">
+                    Review your report.
+                </h2>
+                <p class="text-sm text-[#45544B]">
+                    Take a breath. You are in control of what is submitted.
+                </p>
+            </div>
+
+            <div class="bg-[#F6F4EC] border border-[#DCE2D8] rounded-xl p-4 sm:p-5 space-y-4 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-3 border-b border-[#DCE2D8]">
+                    <div>
+                        <span class="text-[#66756B] block">Victim / Pathway</span>
+                        <p id="rev-victim" class="font-semibold text-[#16211A] mt-0.5">Woman</p>
+                    </div>
+                    <div>
+                        <span class="text-[#66756B] block">Report Privacy</span>
+                        <p id="rev-type" class="font-semibold text-[#16211A] mt-0.5">Anonymous</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pb-3 border-b border-[#DCE2D8]">
+                    <div>
+                        <span class="text-[#66756B] block">Date &amp; Location</span>
+                        <p id="rev-dateloc" class="font-medium text-[#16211A] mt-0.5">-</p>
+                    </div>
+                    <div>
+                        <span class="text-[#66756B] block">Offender Relationship</span>
+                        <p id="rev-offender" class="font-medium text-[#16211A] mt-0.5">-</p>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-[#66756B] block mb-1">Description</span>
+                    <p id="rev-desc" class="p-3 bg-white border border-[#DCE2D8] rounded-lg text-[#16211A] whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto"></p>
+                </div>
+            </div>
+
+            <label class="flex items-start gap-3 p-4 rounded-xl border border-[#DCE2D8] bg-[#F6F4EC] cursor-pointer">
+                <input type="checkbox" id="accuracyCheckbox" required class="mt-0.5 w-4 h-4 accent-[#214A35] rounded shrink-0" />
+                <span class="text-xs text-[#16211A] leading-relaxed">
+                    I confirm that this report is submitted in good faith and the information provided is accurate to the best of my knowledge.
+                </span>
+            </label>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-between items-stretch sm:items-center gap-2.5 pt-4 border-t border-[#DCE2D8]">
+                <button type="button" onclick="goToStep(3)" class="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-[#DCE2D8] text-[#45544B] text-sm font-semibold hover:bg-[#F6F4EC] text-center cursor-pointer">
+                    Back
+                </button>
+                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#214A35] hover:bg-[#183828] text-white text-sm font-semibold transition-colors shadow cursor-pointer">
+                    <span>Submit report</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    let curStep = 1;
+
+    function handleVictimTypeChange() {
+        const isChild = document.getElementById('vt-child').checked;
+        const box = document.getElementById('childMotherBox');
+        if (isChild) {
+            box.classList.remove('hidden');
+        } else {
+            box.classList.add('hidden');
+        }
+        syncChoiceCards();
+    }
+
+    function toggleThirdParty() {
+        const isThird = document.getElementById('tp-third').checked;
+        const box = document.getElementById('tpRelBox');
+        if (isThird) box.classList.remove('hidden');
+        else box.classList.add('hidden');
+        syncChoiceCards();
+    }
+
+    function toggleReportType() {
+        const isIdent = document.getElementById('rt-ident').checked;
+        const identBox = document.getElementById('identifiedInputs');
+        const anonBox = document.getElementById('anonAckBox');
+        clearTraumaCue(2);
+        if (isIdent) {
+            identBox.classList.remove('hidden');
+            anonBox.classList.add('hidden');
+        } else {
+            identBox.classList.add('hidden');
+            anonBox.classList.remove('hidden');
+        }
+        syncChoiceCards();
+    }
+
+    function syncChoiceCards() {
+        document.querySelectorAll('.choice-card').forEach(card => {
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio && radio.checked) {
+                card.classList.add('choice-card-selected');
+            } else {
+                card.classList.remove('choice-card-selected');
+            }
+        });
+    }
+
+    // Trauma-informed gentle validation helpers (No harsh alerts or red flashes)
+    let highlightedElements = [];
+    function showTraumaCue(stepNum, message, targetEl) {
+        clearTraumaCue(stepNum);
+        const cueBox = document.getElementById(`cue-pane-${stepNum}`);
+        const cueText = document.getElementById(`cue-text-${stepNum}`);
+        if (cueBox && cueText) {
+            cueText.textContent = message;
+            cueBox.classList.remove('hidden');
+            cueBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (targetEl) {
+            targetEl.classList.add('ring-2', 'ring-[#E6C8BC]', 'border-[#9A3F2B]');
+            highlightedElements.push(targetEl);
+
+            const clearHandler = function() {
+                targetEl.classList.remove('ring-2', 'ring-[#E6C8BC]', 'border-[#9A3F2B]');
+                if (cueBox) cueBox.classList.add('hidden');
+                targetEl.removeEventListener('input', clearHandler);
+                targetEl.removeEventListener('change', clearHandler);
+            };
+            targetEl.addEventListener('input', clearHandler);
+            targetEl.addEventListener('change', clearHandler);
+        }
+    }
+
+    function clearTraumaCue(stepNum) {
+        const cueBox = document.getElementById(`cue-pane-${stepNum}`);
+        if (cueBox) cueBox.classList.add('hidden');
+        highlightedElements.forEach(el => {
+            el.classList.remove('ring-2', 'ring-[#E6C8BC]', 'border-[#9A3F2B]');
+        });
+        highlightedElements = [];
+    }
+
+    // Calm Unfolding: Updates settled step cards above the active pane
+    function updateSettledShelf(step) {
+        const shelf = document.getElementById('settled-steps-shelf');
+        const b1 = document.getElementById('settled-step-1');
+        const b2 = document.getElementById('settled-step-2');
+        const b3 = document.getElementById('settled-step-3');
+
+        if (step === 1) {
+            shelf.classList.add('hidden');
+            b1.classList.add('hidden');
+            b2.classList.add('hidden');
+            b3.classList.add('hidden');
+            return;
+        }
+
+        shelf.classList.remove('hidden');
+
+        // Step 1 Summary
+        const vtVal = document.querySelector('input[name="VictimType"]:checked')?.value || 'Woman';
+        const within = document.querySelector('input[name="WithinBarangay"]:checked')?.value === 'true';
+        const vtLabel = vtVal === 'Woman' ? 'A woman' : vtVal === 'Child' ? 'A child' : 'Other person';
+        const withinLabel = within ? 'Within this barangay' : 'Outside this barangay';
+        document.getElementById('settled-1-text').textContent = `${vtLabel} · ${withinLabel}`;
+        b1.classList.remove('hidden');
+
+        // Step 2 Summary
+        if (step >= 3) {
+            const isAnon = document.getElementById('rt-anon').checked;
+            let pSummary = isAnon ? 'Anonymous report (no contact details)' : 'Identified report';
+            if (!isAnon) {
+                const name = document.querySelector('input[name="ReporterName"]')?.value.trim();
+                if (name) pSummary += ` (${name})`;
+            }
+            document.getElementById('settled-2-text').textContent = pSummary;
+            b2.classList.remove('hidden');
+        } else {
+            b2.classList.add('hidden');
+        }
+
+        // Step 3 Summary
+        if (step >= 4) {
+            const desc = document.getElementById('incDescInput')?.value.trim() || '';
+            const words = desc ? desc.split(/\s+/).filter(Boolean).length : 0;
+            document.getElementById('settled-3-text').textContent = `Incident description provided (${words} words)`;
+            b3.classList.remove('hidden');
+        } else {
+            b3.classList.add('hidden');
+        }
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    function goToStep(s) {
+        clearTraumaCue(curStep);
+
+        // Gentle Validation with Trauma-Informed Guidance Cues
+        if (s === 3 && curStep === 2) {
+            const isAnon = document.getElementById('rt-anon').checked;
+            if (isAnon) {
+                const ack = document.getElementById('anonAckCheckbox').checked;
+                if (!ack) {
+                    showTraumaCue(2, 'Please confirm your understanding of anonymous reporting so we know how to handle your reference code.', document.getElementById('anonAckBox'));
+                    return;
+                }
+            } else {
+                const nameInput = document.querySelector('input[name="ReporterName"]');
+                const contactInput = document.querySelector('input[name="ContactValue"]');
+                const consentCb = document.querySelector('input[name="ContactConsent"]');
+                
+                if (!nameInput.value.trim()) {
+                    showTraumaCue(2, 'Please provide your name or a safe alias so the desk officer knows how to address you.', nameInput);
+                    nameInput.focus();
+                    return;
+                }
+                if (!contactInput.value.trim()) {
+                    showTraumaCue(2, 'Please provide a safe phone number or email address for outreach.', contactInput);
+                    contactInput.focus();
+                    return;
+                }
+                if (!consentCb.checked) {
+                    showTraumaCue(2, 'Your explicit consent protects your safety before an authorized desk officer contacts you.', consentCb.parentElement);
+                    return;
+                }
+            }
+        }
+
+        if (s === 4 && curStep === 3) {
+            const descInput = document.getElementById('incDescInput');
+            const desc = descInput.value.trim();
+            if (!desc) {
+                showTraumaCue(3, 'Take your time. Even a few sentences or keywords will help the desk officer prepare appropriate assistance.', descInput);
+                descInput.focus();
+                return;
+            }
+        }
+
+        // Calm Unfolding Step Panes Switch
+        for (let i = 1; i <= 4; i++) {
+            const pane = document.getElementById(`step-pane-${i}`);
+            pane.classList.add('hidden');
+            pane.classList.remove('step-pane-enter');
+            const pb = document.getElementById(`pbar-${i}`);
+            pb.classList.remove('bg-[#214A35]');
+            pb.classList.add('bg-[#DCE2D8]');
+        }
+
+        const activePane = document.getElementById(`step-pane-${s}`);
+        activePane.classList.remove('hidden');
+        activePane.classList.add('step-pane-enter');
+
+        for (let i = 1; i <= s; i++) {
+            document.getElementById(`pbar-${i}`).classList.remove('bg-[#DCE2D8]');
+            document.getElementById(`pbar-${i}`).classList.add('bg-[#214A35]');
+        }
+
+        const labels = ['Who & where', 'Privacy & consent', 'What happened', 'Review & submit'];
+        document.getElementById('step-counter-text').textContent = `Step ${s} of 4 · ${labels[s - 1]}`;
+
+        curStep = s;
+        updateSettledShelf(s);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function populateReview() {
+        const vt = document.querySelector('input[name="VictimType"]:checked')?.value || 'Woman';
+        document.getElementById('rev-victim').textContent = vt;
+
+        const isAnon = document.getElementById('rt-anon').checked;
+        document.getElementById('rev-type').textContent = isAnon ? 'Anonymous' : 'Identified';
+
+        const d = document.querySelector('input[name="IncidentDate"]').value;
+        const loc = document.querySelector('input[name="IncidentLocation"]').value;
+        document.getElementById('rev-dateloc').textContent = (d || 'Date not specified') + ' · ' + (loc || 'Barangay Service Area');
+
+        const off = document.querySelector('select[name="OffenderRelationship"]').value;
+        document.getElementById('rev-offender').textContent = off;
+
+        const desc = document.getElementById('incDescInput').value;
+        document.getElementById('rev-desc').textContent = desc || '-';
+    }
+
+    // Word counter and draft preservation
+    function updateDescStats() {
+        const desc = document.getElementById('incDescInput')?.value || '';
+        const words = desc.trim() ? desc.trim().split(/\s+/).filter(Boolean).length : 0;
+        const wordEl = document.getElementById('descWordCount');
+        if (wordEl) wordEl.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+        try {
+            sessionStorage.setItem('sagip_wizard_incident_draft', desc);
+        } catch(e) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        syncChoiceCards();
+        document.querySelectorAll('input[type="radio"]').forEach(r => {
+            r.addEventListener('change', syncChoiceCards);
+        });
+
+        const descInput = document.getElementById('incDescInput');
+        if (descInput) {
+            try {
+                const saved = sessionStorage.getItem('sagip_wizard_incident_draft');
+                if (saved && !descInput.value) {
+                    descInput.value = saved;
+                }
+            } catch(e) {}
+            descInput.addEventListener('input', updateDescStats);
+            updateDescStats();
+        }
+
+        try {
+            const raw = localStorage.getItem('sagip_incident_notebook');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const box = document.getElementById('notebookAttachBox');
+                    const badge = document.getElementById('notebookCountBadge');
+                    const input = document.getElementById('attachedLogsJsonInput');
+                    box.classList.remove('hidden');
+                    badge.textContent = `${parsed.length} entries in notebook`;
+                    input.value = JSON.stringify(parsed);
+                }
+            }
+        } catch(e) {}
+    });
+</script>
+}
