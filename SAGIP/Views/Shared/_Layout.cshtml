@@ -255,31 +255,48 @@
             background-color: #1E1313 !important;
         }
         html.dark .bg-\[\#FBF1EC\],
-        html.dark [class*="bg-[#FBF1EC]"] {
+        html.dark .bg-\[\#fbf1ec\],
+        html.dark [class*="bg-[#fbf1ec]" i] {
             background-color: #381D17 !important;
-            border-color: #6E3225 !important;
+            border-color: #7A3626 !important;
             color: #FFE6DF !important;
         }
         html.dark .border-\[\#E6C8BC\],
-        html.dark [class*="border-[#E6C8BC]"] {
-            border-color: #6E3225 !important;
+        html.dark .border-\[\#e6c8bc\],
+        html.dark [class*="border-[#e6c8bc]" i] {
+            border-color: #7A3626 !important;
         }
         html.dark .text-\[\#8A3422\],
-        html.dark [class*="text-[#8A3422]"],
+        html.dark .text-\[\#8a3422\],
+        html.dark [class*="text-[#8a3422]" i],
         html.dark .text-\[\#9A3F2B\],
-        html.dark [class*="text-[#9A3F2B]"] {
+        html.dark .text-\[\#9a3f2b\],
+        html.dark [class*="text-[#9a3f2b]" i] {
             color: #FFA590 !important;
         }
-        html.dark .bg-\[\#FBF1EC\] p,
-        html.dark [class*="bg-[#FBF1EC]"] p,
-        html.dark .bg-\[\#FBF1EC\] span,
-        html.dark [class*="bg-[#FBF1EC]"] span {
+        html.dark [class*="bg-[#fbf1ec]" i] p,
+        html.dark [class*="bg-[#fbf1ec]" i] span,
+        html.dark [class*="bg-[#fbf1ec]" i] * {
             color: #FFE6DF !important;
         }
-        html.dark .bg-\[\#FBF1EC\] p.tabular-nums,
-        html.dark [class*="bg-[#FBF1EC]"] p.tabular-nums {
-            color: #FF9B82 !important;
+        html.dark [class*="bg-[#fbf1ec]" i] p.tabular-nums,
+        html.dark [class*="bg-[#fbf1ec]" i] .tabular-nums,
+        html.dark [class*="bg-[#fbf1ec]" i] p:first-child {
+            color: #FFA085 !important;
             font-weight: 700 !important;
+        }
+
+        /* Navigation Links in Dark Mode */
+        html.dark nav a {
+            color: #C5B5B0 !important;
+        }
+        html.dark nav a:hover {
+            color: #FFFFFF !important;
+        }
+        html.dark nav a[class*="border-[#214a35]" i],
+        html.dark nav a[class*="border-[#214A35]"] {
+            color: #FFFFFF !important;
+            border-color: #A77979 !important;
         }
         html.dark .border-\[\#DCE2D8\],
         html.dark .border-\[\#C9D6C5\],
