@@ -254,10 +254,32 @@
         html.dark .bg-\[\#1B3B2B\] {
             background-color: #1E1313 !important;
         }
-        html.dark .bg-\[\#FBF1EC\] {
-            background-color: #331A15 !important;
-            border-color: #5C2D24 !important;
-            color: #F7CEC5 !important;
+        html.dark .bg-\[\#FBF1EC\],
+        html.dark [class*="bg-[#FBF1EC]"] {
+            background-color: #381D17 !important;
+            border-color: #6E3225 !important;
+            color: #FFE6DF !important;
+        }
+        html.dark .border-\[\#E6C8BC\],
+        html.dark [class*="border-[#E6C8BC]"] {
+            border-color: #6E3225 !important;
+        }
+        html.dark .text-\[\#8A3422\],
+        html.dark [class*="text-[#8A3422]"],
+        html.dark .text-\[\#9A3F2B\],
+        html.dark [class*="text-[#9A3F2B]"] {
+            color: #FFA590 !important;
+        }
+        html.dark .bg-\[\#FBF1EC\] p,
+        html.dark [class*="bg-[#FBF1EC]"] p,
+        html.dark .bg-\[\#FBF1EC\] span,
+        html.dark [class*="bg-[#FBF1EC]"] span {
+            color: #FFE6DF !important;
+        }
+        html.dark .bg-\[\#FBF1EC\] p.tabular-nums,
+        html.dark [class*="bg-[#FBF1EC]"] p.tabular-nums {
+            color: #FF9B82 !important;
+            font-weight: 700 !important;
         }
         html.dark .border-\[\#DCE2D8\],
         html.dark .border-\[\#C9D6C5\],
