@@ -234,7 +234,13 @@
         html.dark {
             color-scheme: dark;
         }
-        html.dark, html.dark body {
+        html.dark, html.dark body,
+        html.dark .bg-\[\#DDE6ED\],
+        html.dark [class*="bg-[#DDE6ED]"],
+        html.dark .bg-\[\#dde6ed\],
+        html.dark [class*="bg-[#dde6ed]" i],
+        html.dark .bg-\[\#F6F4EC\],
+        html.dark [class*="bg-[#F6F4EC]"] {
             background-color: #0D1321 !important;
             color: #DDE6ED !important;
         }
@@ -247,9 +253,16 @@
             color: #DDE6ED !important;
             border-color: #23334D !important;
         }
-        html.dark .bg-\[\#F6F4EC\],
-        html.dark [class*="bg-[#F6F4EC]"] {
-            background-color: #0D1321 !important;
+        html.dark .bg-gray-50,
+        html.dark .bg-gray-100 {
+            background-color: #1A2638 !important;
+            color: #DDE6ED !important;
+            border-color: #2D415A !important;
+        }
+        html.dark .border-gray-100,
+        html.dark .border-gray-200,
+        html.dark .border-gray-300 {
+            border-color: #23334D !important;
         }
         html.dark .bg-\[\#EAF0E8\],
         html.dark [class*="bg-[#EAF0E8]"] {
@@ -280,28 +293,56 @@
         html.dark .divide-\[\#DCE2D8\] > :not([hidden]) ~ :not([hidden]) {
             border-color: #23334D !important;
         }
+
+        /* Typography & High-Contrast Readability in Dark Mode */
+        html.dark .text-\[\#0D1321\],
+        html.dark [class*="text-[#0D1321]"],
+        html.dark .text-\[\#0d1321\],
+        html.dark [class*="text-[#0d1321]" i],
         html.dark .text-\[\#16211A\],
+        html.dark [class*="text-[#16211A]"],
         html.dark .text-\[\#1B3B2B\],
-        html.dark .text-\[\#1B4D3E\] {
+        html.dark [class*="text-[#1B3B2B]"],
+        html.dark .text-\[\#1B4D3E\],
+        html.dark [class*="text-[#1B4D3E]"],
+        html.dark .text-gray-900,
+        html.dark .text-gray-800,
+        html.dark .text-gray-700 {
             color: #DDE6ED !important;
         }
-        html.dark .text-\[\#45544B\] {
+        html.dark .text-gray-600,
+        html.dark .text-gray-500,
+        html.dark .text-\[\#45544B\],
+        html.dark [class*="text-[#45544B]"] {
             color: #B0C1D4 !important;
         }
+        html.dark .text-gray-400,
         html.dark .text-\[\#66756B\],
-        html.dark .text-\[\#526058\] {
+        html.dark [class*="text-[#66756B]"],
+        html.dark .text-\[\#526058\],
+        html.dark [class*="text-[#526058]"] {
             color: #9DB2BF !important;
         }
         html.dark .text-\[\#214A35\],
-        html.dark .text-\[\#2F6347\] {
-            color: #9DB2BF !important;
+        html.dark [class*="text-[#214A35]"],
+        html.dark .text-\[\#2F6347\],
+        html.dark [class*="text-[#2F6347]"] {
+            color: #B0C1D4 !important;
         }
+
+        /* Form Inputs & Selects in Dark Mode */
         html.dark input,
         html.dark select,
         html.dark textarea {
             background-color: #0F1724 !important;
             color: #DDE6ED !important;
             border-color: #23334D !important;
+        }
+        html.dark input:focus,
+        html.dark select:focus,
+        html.dark textarea:focus {
+            border-color: #3E5C76 !important;
+            outline: none !important;
         }
         html.dark input::placeholder,
         html.dark textarea::placeholder {
@@ -312,7 +353,8 @@
             background-color: rgba(62, 92, 118, 0.25) !important;
         }
         html.dark .bg-\[\#F6F4EC\] table thead,
-        html.dark table thead.bg-\[\#F6F4EC\] {
+        html.dark table thead.bg-\[\#F6F4EC\],
+        html.dark table thead {
             background-color: #0F1724 !important;
             color: #9DB2BF !important;
             border-color: #23334D !important;
@@ -341,6 +383,48 @@
             accent-color: #3E5C76;
         }
 
+        /* Filter Pills & Toggles */
+        html.dark .bg-\[\#F6F4EC\] a.bg-white,
+        html.dark .bg-\[\#F6F4EC\] button.bg-white,
+        html.dark .bg-\[\#DDE6ED\] a.bg-white,
+        html.dark .bg-\[\#DDE6ED\] button.bg-white {
+            background-color: #3E5C76 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Alerts & Callout Banners in Dark Mode */
+        html.dark .bg-\[\#FBF1EC\],
+        html.dark [class*="bg-[#FBF1EC]"],
+        html.dark .bg-\[\#fbf1ec\],
+        html.dark [class*="bg-[#fbf1ec]" i] {
+            background-color: #2D1B1B !important;
+            border-color: #553333 !important;
+            color: #FFBDBD !important;
+        }
+        html.dark .text-\[\#8A3422\],
+        html.dark [class*="text-[#8A3422]"],
+        html.dark .text-\[\#9A3F2B\],
+        html.dark [class*="text-[#9A3F2B]"] {
+            color: #FFBDBD !important;
+        }
+        html.dark .border-\[\#E6C8BC\],
+        html.dark [class*="border-[#E6C8BC]"] {
+            border-color: #553333 !important;
+        }
+        html.dark .bg-amber-100,
+        html.dark .bg-amber-50 {
+            background-color: #2D2415 !important;
+            border-color: #5E4C2B !important;
+            color: #FFE6B3 !important;
+        }
+        html.dark .text-amber-950,
+        html.dark .text-amber-900 {
+            color: #FFE6B3 !important;
+        }
+        html.dark .text-amber-700 {
+            color: #FCD34D !important;
+        }
+
         /* Ambient Transitions & Animation System */
         body, header, aside, main, footer {
             transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
@@ -358,8 +442,8 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-[#DDE6ED] text-[#0D1321] overflow-x-hidden">
-    <div class="min-h-screen bg-[#DDE6ED] text-[#0D1321] flex flex-col lg:flex-row overflow-x-hidden">
+<body class="min-h-screen bg-[#DDE6ED] dark:bg-[#0D1321] text-[#0D1321] dark:text-[#DDE6ED] overflow-x-hidden">
+    <div class="min-h-screen bg-[#DDE6ED] dark:bg-[#0D1321] text-[#0D1321] dark:text-[#DDE6ED] flex flex-col lg:flex-row overflow-x-hidden">
         <!-- Sidebar -->
         <aside class="lg:w-64 bg-[#1D2D44] text-[#DDE6ED] flex flex-col justify-between shrink-0 border-r border-[#0D1321]/30">
             <div class="p-6 space-y-6">
